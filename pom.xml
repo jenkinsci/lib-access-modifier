@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.kohsuke</groupId>
+  <artifactId>deprecation-enforcer</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <name>Deprecation enforcer</name>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>deprecation-annotation</module>
+    <module>deprecation-checker</module>
+  </modules>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
