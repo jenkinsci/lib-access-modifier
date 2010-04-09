@@ -7,6 +7,6 @@ import org.kohsuke.depann.Restricted;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class RestrictedElement {
-    public abstract String toString();
+public interface RestrictedElement {
+    String toString();
 }

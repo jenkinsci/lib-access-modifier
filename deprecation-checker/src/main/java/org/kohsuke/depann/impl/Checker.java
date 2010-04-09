@@ -27,14 +27,15 @@ import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 
 /**
+ * Performs check.
+ *
  * @author Kohsuke Kawaguchi
  */
 public class Checker {
     /**
-     * List of dependency jar files or class directories.
+     * Where dependencies are loaded. We don't actually load classes,
+     * but this is used to search for class files and indexed restrictions.
      */
-//    public final List<File> dependencies = new ArrayList<File>();
-
     public final ClassLoader dependencies;
 
     /**
@@ -52,7 +53,7 @@ public class Checker {
      * <li>internal name of a type + '.' + method name + method descriptor
      * </ul>
      */
-    private final Map<String,AccessRestriction> restrictions = new HashMap<String, AccessRestriction>();
+    private final Map<String,Restrictions> restrictions = new HashMap<String,Restrictions>();
 
     private final AccessRestrictionFactory factory;
 
@@ -92,7 +93,7 @@ public class Checker {
             while ((className=r.readLine())!=null) {
                 InputStream is = dependencies.getResourceAsStream(className.replace('.','/') + ".class");
                 if (is==null) {
-                    errorListener.onWarning(null,"Failed to find class file for "+ className);
+                    errorListener.onWarning(null,null,"Failed to find class file for "+ className);
                     continue;
                 }
 
@@ -135,7 +136,10 @@ public class Checker {
                          */
                         private AnnotationVisitor onAnnotationFor(final String keyName, String desc) {
                             if (RESTRICTED_DESCRIPTOR.equals(desc)) {
-                                return new Parser() {
+                                RestrictedElement target = new RestrictedElement() {
+                                    public String toString() { return keyName; }
+                                };
+                                return new Parser(target) {
                                     @Override
                                     public void visitEnd() {
                                         try {
@@ -153,7 +157,7 @@ public class Checker {
                                      * Fails to load a {@link AccessRestriction} instance.
                                      */
                                     private void failure(Exception e) {
-                                        errorListener.onError(e,"Failed to load restrictions");
+                                        errorListener.onError(e,null,"Failed to load restrictions");
                                     }
                                 };
                             }
@@ -216,7 +220,7 @@ public class Checker {
 
                         @Override
                         public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-                            AccessRestriction r = getRestrictions(owner + '.' + name);
+                            Restrictions r = getRestrictions(owner + '.' + name);
                             switch (opcode) {
                             case Opcodes.GETSTATIC:
                             case Opcodes.GETFIELD:
@@ -263,8 +267,8 @@ public class Checker {
         }
     }
 
-    private AccessRestriction getRestrictions(String keyName) {
-        AccessRestriction r = restrictions.get(keyName);
+    private Restrictions getRestrictions(String keyName) {
+        Restrictions r = restrictions.get(keyName);
         if (r==null)    return Restrictions.NONE;
         return r;
     }

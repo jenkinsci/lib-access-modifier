@@ -11,51 +11,61 @@ import java.util.List;
 /**
  * @author Kohsuke Kawaguchi
  */
-public class Restrictions extends ArrayList<AccessRestriction> implements AccessRestriction {
-    public Restrictions(Collection<? extends AccessRestriction> c) {
+public class Restrictions extends ArrayList<AccessRestriction> {
+    private final RestrictedElement target;
+
+    public Restrictions(RestrictedElement target, Collection<? extends AccessRestriction> c) {
         super(c);
+        this.target = target;
     }
 
-    public Restrictions() {
+    public Restrictions(RestrictedElement target) {
+        this.target = target;
     }
 
-    public void usedAsSuperType(Location loc, RestrictedElement target, ErrorListener errorListener) {
+    public void usedAsSuperType(Location loc, ErrorListener errorListener) {
         for (AccessRestriction ar : this)
             ar.usedAsSuperType(loc,target,errorListener);
     }
 
-    public void usedAsInterface(Location loc, RestrictedElement target, ErrorListener errorListener) {
+    public void usedAsInterface(Location loc, ErrorListener errorListener) {
         for (AccessRestriction ar : this)
             ar.usedAsInterface(loc,target,errorListener);
     }
 
-    public void instantiated(Location loc, RestrictedElement target, ErrorListener errorListener) {
+    public void instantiated(Location loc, ErrorListener errorListener) {
         for (AccessRestriction ar : this)
             ar.instantiated(loc,target,errorListener);
     }
 
-    public void invoked(Location location, RestrictedElement target, ErrorListener errorListener) {
+    public void invoked(Location location, ErrorListener errorListener) {
         for (AccessRestriction ar : this)
             ar.invoked(location,target,errorListener);
     }
 
-    public void read(Location location, RestrictedElement target, ErrorListener errorListener) {
+    public void read(Location location, ErrorListener errorListener) {
         for (AccessRestriction ar : this)
             ar.read(location,target,errorListener);
     }
 
-    public void written(Location location, RestrictedElement target, ErrorListener errorListener) {
+    public void written(Location location, ErrorListener errorListener) {
         for (AccessRestriction ar : this)
             ar.written(location,target,errorListener);
     }
 
 
 
-
-    public static final Restrictions NONE = new Restrictions();
+    public static final Restrictions NONE = new Restrictions(new RestrictedElement() {
+        public String toString() { return "NONE"; }
+    });
 
     abstract static class Parser implements AnnotationVisitor {
         private List<Type> restrictions = new ArrayList<Type>();
+        private final RestrictedElement target;
+
+        protected Parser(RestrictedElement target) {
+            this.target = target;
+        }
 
         public void visit(String name, Object value) {
             restrictions.add((Type)value);
@@ -75,7 +85,7 @@ public class Restrictions extends ArrayList<AccessRestriction> implements Access
         public abstract void visitEnd();
 
         public Restrictions build(AccessRestrictionFactory f) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-            Restrictions r = new Restrictions();
+            Restrictions r = new Restrictions(target);
             for (Type t : restrictions) {
                 r.add(f.get(t));
             }
