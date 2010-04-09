@@ -45,7 +45,18 @@ public class EnforcerMojo extends AbstractMojo {
             URL outputURL = outputDir.toURI().toURL();
             dependencies.add(outputURL);
 
-            Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[dependencies.size()]), getClass().getClassLoader()));
+            final boolean[] failed = new boolean[1];
+            Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[dependencies.size()]), getClass().getClassLoader()),
+                new ErrorListener() {
+                    public void onError(Throwable t, Location loc, String msg) {
+                        getLog().error(loc+" "+msg,t);
+                        failed[0] = true;
+                    }
+
+                    public void onWarning(Throwable t, Location loc, String msg) {
+                        getLog().warn(loc+" "+msg,t);
+                    }
+                });
 
             {// if there's restriction list in the inspected module itself, load it as well
                 InputStream self = null;
@@ -58,17 +69,6 @@ public class EnforcerMojo extends AbstractMojo {
             }
 
             // perform checks
-            final boolean[] failed = new boolean[1];
-            checker.setErrorListener(new ErrorListener() {
-                public void onError(Throwable t, Location loc, String msg) {
-                    getLog().error(loc+" "+msg,t);
-                    failed[0] = true;
-                }
-
-                public void onWarning(Throwable t, Location loc, String msg) {
-                    getLog().warn(loc+" "+msg,t);
-                }
-            });
             checker.check(outputDir);
             if (failed[0])
                 throw new MojoFailureException("Access modifier checks failed. See the details above");

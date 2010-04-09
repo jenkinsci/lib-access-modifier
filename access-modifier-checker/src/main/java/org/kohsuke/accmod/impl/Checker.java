@@ -63,7 +63,7 @@ public class Checker {
     /**
      * Where errors and warnings are sent.
      */
-    private ErrorListener errorListener = ErrorListener.NULL;
+    private final ErrorListener errorListener;
 
     /**
      * Restrictions found from dependencies.
@@ -80,27 +80,23 @@ public class Checker {
     private final AccessRestrictionFactory factory;
 
 
-    public Checker(ClassLoader dependencies) {
+    public Checker(ClassLoader dependencies, ErrorListener errorListener) throws IOException {
         this.dependencies = dependencies;
+        this.errorListener = errorListener;
         this.factory = new AccessRestrictionFactory(dependencies);
+
+        // load access restrictions
+        loadAccessRestrictions();
     }
 
     public ErrorListener getErrorListener() {
         return errorListener;
     }
 
-    public void setErrorListener(ErrorListener errorListener) {
-        this.errorListener = errorListener;
-    }
-
     /**
      * Checks a single class file or a directory full of class files (recursively.)
      */
     public void check(File f) throws IOException {
-        // load access restrictions
-        loadAccessRestrictions();
-
-
         if (f.isDirectory()) {
             for (File c : f.listFiles())
                 check(c);
