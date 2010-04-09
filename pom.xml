@@ -7,6 +7,7 @@
 
   <name>Custom access modifier for Java</name>
   <packaging>pom</packaging>
+  <description>Extensible application-specific access modifiers for Java</description>
 
   <modules>
     <module>access-modifier-annotation</module>
@@ -25,10 +26,10 @@
       <id>java.net-m2-repository</id>
       <url>java-net:/maven2-repository/trunk/repository/</url>
     </repository>
-    <!--site>
-      <id>kenai</id>
-      <url>dav:https://kenai.com/website/access-modifier/</url>
-    </site-->
+    <site>
+      <id>kohsuke.org</id>
+      <url>scp://kohsuke.org/home/kohsuke/mainwebsite_html/access-modifier/</url>
+    </site>
   </distributionManagement>
 
   <build>

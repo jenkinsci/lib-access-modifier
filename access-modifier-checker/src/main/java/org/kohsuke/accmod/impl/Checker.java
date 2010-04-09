@@ -291,6 +291,10 @@ public class Checker {
                     public String toString() {
                         return className+':'+line;
                     }
+
+                    public ClassLoader getDependencyClassLoader() {
+                        return dependencies;
+                    }
                 };
             }, SKIP_FRAMES);
         } finally {

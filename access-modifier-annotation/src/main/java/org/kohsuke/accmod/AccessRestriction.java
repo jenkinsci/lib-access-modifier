@@ -32,7 +32,14 @@ import org.kohsuke.accmod.restrictions.None;
  * Access restriction policy &mdash; determines what access is OK and what are not.
  *
  * <p>
- * The subtype of this interface is a stateless strategy object.
+ * The subtype of this interface is a strategy object. Instances of
+ * these classes are created during the access enforcement to perform constraint checks.
+ *
+ * <p>
+ * Single execution of the enforcement check would create at most one instance
+ * of a given {@link AccessRestriction} type, so instance fields can be used to store
+ * heavy-weight objects or other indicies that you might need for implementing
+ * access control checks. 
  *
  * @author Kohsuke Kawaguchi
  */

@@ -23,6 +23,8 @@
  */
 package org.kohsuke.accmod.impl;
 
+import org.kohsuke.accmod.AccessRestriction;
+
 /**
  * Indicates the location that the use occurred.
  *
@@ -30,13 +32,16 @@ package org.kohsuke.accmod.impl;
  */
 public abstract class Location {
     /**
-     * The class name in which the use happened.
+     * The fully-qualified class name in which the use happened,
+     * for example "abc.def.Ghi"
      */
     public abstract String getClassName();
 
     /**
      * If the use happened in the byte code instruction,
      * method name that the use occurred in.
+     * <p>
+     * For example "getAbc"
      */
     public abstract String getMethodName();
 
@@ -57,4 +62,16 @@ public abstract class Location {
      * Useful for an error message.
      */
     public abstract String toString();
+
+    /**
+     * {@link AccessRestriction} implementations can use this classloader
+     * to access the classes referenced by classes being inspected.
+     *
+     * <p>
+     * Loading a class has a side effect, so it's generally not recommended
+     * to do so, but the caller can use {@link ClassLoader#getResource(String)}
+     * and parse the class files via libraries like ASM to define more elaborate
+     * access restrictions.
+     */
+    public abstract ClassLoader getDependencyClassLoader();
 }
