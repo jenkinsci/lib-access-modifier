@@ -37,13 +37,17 @@ public class EnforcerMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            final boolean[] failed = new boolean[1];
+            File outputDir = new File(project.getBuild().getOutputDirectory());
+
             List<URL> dependencies = new ArrayList<URL>();
             for (Artifact a : (Collection<Artifact>)project.getArtifacts())
                 dependencies.add(a.getFile().toURI().toURL());
-            Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[dependencies.size()])));
+            dependencies.add(outputDir.toURI().toURL());
+
+            Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[dependencies.size()]), getClass().getClassLoader()));
 
             // perform checks
+            final boolean[] failed = new boolean[1];
             checker.setErrorListener(new ErrorListener() {
                 public void onError(Throwable t, Location loc, String msg) {
                     getLog().error(loc+" "+msg,t);
@@ -54,7 +58,9 @@ public class EnforcerMojo extends AbstractMojo {
                     getLog().warn(loc+" "+msg,t);
                 }
             });
-            checker.check(new File(project.getBuild().getOutputDirectory()));
+            checker.check(outputDir);
+            if (failed[0])
+                throw new MojoFailureException("Access modifier checks failed. See the details above");
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to enforce @Restricted constraints",e);
         }
