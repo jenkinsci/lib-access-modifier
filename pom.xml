@@ -65,4 +65,19 @@
   <scm>
     <connection>scm:git:git://github.com/kohsuke/access-modifier.git</connection>
   </scm>
+
+  <developers>
+    <developer>
+      <id>kohsuke</id>
+      <name>Kohsuke Kawaguchi</name>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <distribution>repository</distribution>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
 </project>
