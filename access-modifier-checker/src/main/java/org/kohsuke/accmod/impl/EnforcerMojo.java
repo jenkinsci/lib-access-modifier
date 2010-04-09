@@ -9,12 +9,12 @@ import org.kohsuke.accmod.Restricted;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Enforces the {@link Restricted} access modifier annotations.
@@ -42,9 +42,20 @@ public class EnforcerMojo extends AbstractMojo {
             List<URL> dependencies = new ArrayList<URL>();
             for (Artifact a : (Collection<Artifact>)project.getArtifacts())
                 dependencies.add(a.getFile().toURI().toURL());
-            dependencies.add(outputDir.toURI().toURL());
+            URL outputURL = outputDir.toURI().toURL();
+            dependencies.add(outputURL);
 
             Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[dependencies.size()]), getClass().getClassLoader()));
+
+            {// if there's restriction list in the inspected module itself, load it as well
+                InputStream self = null;
+                try {
+                    self = new URL(outputURL, "META-INF/annotations/" + Restricted.class.getName()).openStream();
+                } catch (IOException e) {
+                }
+                if (self!=null)
+                    checker.loadRestrictions(self, true);
+            }
 
             // perform checks
             final boolean[] failed = new boolean[1];

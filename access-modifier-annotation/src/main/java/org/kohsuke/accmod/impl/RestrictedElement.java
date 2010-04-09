@@ -31,5 +31,12 @@ import org.kohsuke.accmod.Restricted;
  * @author Kohsuke Kawaguchi
  */
 public interface RestrictedElement {
+    /**
+     * True if the restricted element is a part of the code that's being inspected.
+     * Often you want to relax restrictions for those that are in the same module,
+     * and this can be used for that.
+     */
+    boolean isInTheInspectedModule();
+
     String toString();
 }

@@ -46,7 +46,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 
 /**
@@ -119,85 +118,102 @@ public class Checker {
         final Enumeration<URL> res = dependencies.getResources("META-INF/annotations/"+Restricted.class.getName());
         while (res.hasMoreElements()) {
             URL url = res.nextElement();
-            BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
-            String className;
-            while ((className=r.readLine())!=null) {
-                InputStream is = dependencies.getResourceAsStream(className.replace('.','/') + ".class");
-                if (is==null) {
-                    errorListener.onWarning(null,null,"Failed to find class file for "+ className);
-                    continue;
-                }
+            loadRestrictions(url.openStream(),false);
+        }
+    }
 
-                try {
-                    new ClassReader(is).accept(new EmptyVisitor() {
-                        private String className;
+    /**
+     * Loads an additional restriction from the specified "META-INF/annotations/org.kohsuke.accmod.Restricted" file.
+     *
+     * @param isInTheInspectedModule
+     *      This value shows up in {@link RestrictedElement#isInTheInspectedModule()}.
+     * @param stream
+     */
+    public void loadRestrictions(InputStream stream, final boolean isInTheInspectedModule) throws IOException {
+        if (stream==null)      return;
 
-                        @Override
-                        public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-                            this.className = name;
-                        }
+        BufferedReader r = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+        String className;
+        while ((className=r.readLine())!=null) {
+            InputStream is = dependencies.getResourceAsStream(className.replace('.','/') + ".class");
+            if (is==null) {
+                errorListener.onWarning(null,null,"Failed to find class file for "+ className);
+                continue;
+            }
 
-                        @Override
-                        public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-                            return onAnnotationFor(className,desc);
-                        }
+            try {
+                new ClassReader(is).accept(new EmptyVisitor() {
+                    private String className;
 
-                        @Override
-                        public FieldVisitor visitField(int access, final String name, String desc, String signature, Object value) {
-                            return new EmptyVisitor() {
-                                @Override
-                                public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-                                    return onAnnotationFor(className+'.'+name,desc);
-                                }
-                            };
-                        }
+                    @Override
+                    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+                        this.className = name;
+                    }
 
-                        @Override
-                        public MethodVisitor visitMethod(int access, final String methodName, final String methodDesc, String signature, String[] exceptions) {
-                            return new EmptyVisitor() {
-                                @Override
-                                public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-                                    return onAnnotationFor(className+'.'+methodName+methodDesc,desc);
-                                }
-                            };
-                        }
+                    @Override
+                    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+                        return onAnnotationFor(className,desc);
+                    }
 
-                        /**
-                         * Parse {@link Restricted} annotation on some annotated element.
-                         */
-                        private AnnotationVisitor onAnnotationFor(final String keyName, String desc) {
-                            if (RESTRICTED_DESCRIPTOR.equals(desc)) {
-                                RestrictedElement target = new RestrictedElement() {
-                                    public String toString() { return keyName; }
-                                };
-                                return new Parser(target) {
-                                    @Override
-                                    public void visitEnd() {
-                                        try {
-                                            restrictions.put(keyName,build(factory));
-                                        } catch (ClassNotFoundException e) {
-                                            failure(e);
-                                        } catch (InstantiationException e) {
-                                            failure(e);
-                                        } catch (IllegalAccessException e) {
-                                            failure(e);
-                                        }
-                                    }
-
-                                    /**
-                                     * Fails to load a {@link AccessRestriction} instance.
-                                     */
-                                    private void failure(Exception e) {
-                                        errorListener.onError(e,null,"Failed to load restrictions");
-                                    }
-                                };
+                    @Override
+                    public FieldVisitor visitField(int access, final String name, String desc, String signature, Object value) {
+                        return new EmptyVisitor() {
+                            @Override
+                            public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+                                return onAnnotationFor(className+'.'+name,desc);
                             }
-                            return null;
+                        };
+                    }
+
+                    @Override
+                    public MethodVisitor visitMethod(int access, final String methodName, final String methodDesc, String signature, String[] exceptions) {
+                        return new EmptyVisitor() {
+                            @Override
+                            public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+                                return onAnnotationFor(className+'.'+methodName+methodDesc,desc);
+                            }
+                        };
+                    }
+
+                    /**
+                     * Parse {@link Restricted} annotation on some annotated element.
+                     */
+                    private AnnotationVisitor onAnnotationFor(final String keyName, String desc) {
+                        if (RESTRICTED_DESCRIPTOR.equals(desc)) {
+                            RestrictedElement target = new RestrictedElement() {
+                                public boolean isInTheInspectedModule() {
+                                    return isInTheInspectedModule;
+                                }
+
+                                public String toString() { return keyName; }
+                            };
+                            return new Parser(target) {
+                                @Override
+                                public void visitEnd() {
+                                    try {
+                                        restrictions.put(keyName,build(factory));
+                                    } catch (ClassNotFoundException e) {
+                                        failure(e);
+                                    } catch (InstantiationException e) {
+                                        failure(e);
+                                    } catch (IllegalAccessException e) {
+                                        failure(e);
+                                    }
+                                }
+
+                                /**
+                                 * Fails to load a {@link AccessRestriction} instance.
+                                 */
+                                private void failure(Exception e) {
+                                    errorListener.onError(e,null,"Failed to load restrictions");
+                                }
+                            };
                         }
-                    }, ClassReader.SKIP_CODE);
-                } finally {
-                    is.close();
-                }
+                        return null;
+                    }
+                }, ClassReader.SKIP_CODE);
+            } finally {
+                is.close();
             }
         }
     }
@@ -294,6 +310,11 @@ public class Checker {
 
                     public ClassLoader getDependencyClassLoader() {
                         return dependencies;
+                    }
+
+                    public boolean isInTheSameModuleAs(RestrictedElement e) {
+                        // TODO
+                        throw new UnsupportedOperationException();
                     }
                 };
             }, SKIP_FRAMES);

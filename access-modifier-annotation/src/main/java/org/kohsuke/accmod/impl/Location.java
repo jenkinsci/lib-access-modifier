@@ -30,12 +30,12 @@ import org.kohsuke.accmod.AccessRestriction;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class Location {
+public interface Location {
     /**
      * The fully-qualified class name in which the use happened,
      * for example "abc.def.Ghi"
      */
-    public abstract String getClassName();
+    String getClassName();
 
     /**
      * If the use happened in the byte code instruction,
@@ -43,25 +43,25 @@ public abstract class Location {
      * <p>
      * For example "getAbc"
      */
-    public abstract String getMethodName();
+    String getMethodName();
 
     /**
      * This is the encoded method signature like "(II)Z"
      * in which the use happened. Used in conjunction with
      * {@link #getMethodName()} to disambiguate overload.
      */
-    public abstract String getMethodDescriptor();
+    String getMethodDescriptor();
 
     /**
      * The line number in the source file where the use happened.
      */
-    public abstract int getLineNumber();
+    int getLineNumber();
 
     /**
      * Obtains a human readable description of the location.
      * Useful for an error message.
      */
-    public abstract String toString();
+    String toString();
 
     /**
      * {@link AccessRestriction} implementations can use this classloader
@@ -73,5 +73,5 @@ public abstract class Location {
      * and parse the class files via libraries like ASM to define more elaborate
      * access restrictions.
      */
-    public abstract ClassLoader getDependencyClassLoader();
+    ClassLoader getDependencyClassLoader();
 }
