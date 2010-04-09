@@ -63,7 +63,7 @@
   </build>
  
   <scm>
-    <connection>scm:git:git://github.com/kohsuke/access-modifier.git</connection>
+    <connection>scm:git:git@github.com:kohsuke/access-modifier.git</connection>
   </scm>
 
   <developers>
