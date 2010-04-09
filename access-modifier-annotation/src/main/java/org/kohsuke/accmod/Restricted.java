@@ -34,6 +34,10 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
  * Indicates that a particular element is really deprecated and that the access to it
  * is subject to the additional restrictions.
  *
+ * <p>
+ * These annotations and restrictions introduced by them are enforced by the
+ * "access-modifier-checker" mojo. 
+ *
  * @author Kohsuke Kawaguchi
  */
 @Retention(CLASS)
