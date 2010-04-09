@@ -2,15 +2,15 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kohsuke</groupId>
-  <artifactId>deprecation-enforcer</artifactId>
+  <artifactId>access-modifier</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>Deprecation enforcer</name>
+  <name>Custom access modifier for Java</name>
   <packaging>pom</packaging>
 
   <modules>
-    <module>deprecation-annotation</module>
-    <module>deprecation-checker</module>
+    <module>access-modifier-annotation</module>
+    <module>access-modifier-checker</module>
   </modules>
 
   <build>
