@@ -40,12 +40,21 @@ public abstract class Location {
      */
     public abstract String getMethodName();
 
+    /**
+     * This is the encoded method signature like "(II)Z"
+     * in which the use happened. Used in conjunction with
+     * {@link #getMethodName()} to disambiguate overload.
+     */
     public abstract String getMethodDescriptor();
 
+    /**
+     * The line number in the source file where the use happened.
+     */
     public abstract int getLineNumber();
 
     /**
      * Obtains a human readable description of the location.
+     * Useful for an error message.
      */
     public abstract String toString();
 }

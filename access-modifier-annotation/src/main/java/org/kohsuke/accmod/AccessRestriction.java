@@ -36,7 +36,7 @@ import org.kohsuke.accmod.restrictions.None;
  *
  * @author Kohsuke Kawaguchi
  */
-public interface AccessRestriction {
+public abstract class AccessRestriction {
     /**
      * The type on which this restriction is placed is used as a supertype by another class.
      * The location points to the subtype.
@@ -46,7 +46,7 @@ public interface AccessRestriction {
      * @param errorListener
      *      Report any error here.
      */
-    void usedAsSuperType(Location loc, RestrictedElement target, ErrorListener errorListener);
+    public abstract void usedAsSuperType(Location loc, RestrictedElement target, ErrorListener errorListener);
 
     /**
      * The type on which this restriction is placed is used as an interface that another class/interface implements.
@@ -56,31 +56,31 @@ public interface AccessRestriction {
      * @param errorListener
      *      Report any error here.
      */
-    void usedAsInterface(Location loc, RestrictedElement target, ErrorListener errorListener);
+    public abstract void usedAsInterface(Location loc, RestrictedElement target, ErrorListener errorListener);
 
     /**
      * The type on which this restriction is placed is instantiated elsewhere.
      */
-    void instantiated(Location loc, RestrictedElement target, ErrorListener errorListener);
+    public abstract void instantiated(Location loc, RestrictedElement target, ErrorListener errorListener);
 
     /**
      * The method on which this restriction is placed is invoked elsewhere.
      */
-    void invoked(Location loc, RestrictedElement target, ErrorListener errorListener);
+    public abstract void invoked(Location loc, RestrictedElement target, ErrorListener errorListener);
 
     /**
      * The field on which this restriction is placed is read.
      */
-    void read(Location loc, RestrictedElement target, ErrorListener errorListener);
+    public abstract void read(Location loc, RestrictedElement target, ErrorListener errorListener);
 
     /**
      * The field on which this restriction is placed is updated.
      */
-    void written(Location loc, RestrictedElement target, ErrorListener errorListener);
+    public abstract void written(Location loc, RestrictedElement target, ErrorListener errorListener);
 
 
     /**
      * {@link AccessRestriction} that imposes no restriction.
      */
-    AccessRestriction NONE = new None();
+    public static final AccessRestriction NONE = new None();
 }

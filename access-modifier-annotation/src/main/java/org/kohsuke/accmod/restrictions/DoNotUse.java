@@ -33,7 +33,7 @@ import org.kohsuke.accmod.impl.RestrictedElement;
  *
  * @author Kohsuke Kawaguchi
  */
-public class DoNotUse implements AccessRestriction {
+public class DoNotUse extends AccessRestriction {
     public void written(Location loc, RestrictedElement target, ErrorListener errorListener) {
         error(loc,target,errorListener);
     }

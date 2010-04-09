@@ -13,6 +13,13 @@
     <module>access-modifier-checker</module>
   </modules>
 
+  <repositories>
+    <repository>
+      <id>java.net2</id>
+      <url>http://maven.dyndns.org/2/</url>
+    </repository>
+  </repositories>
+
   <distributionManagement>
     <repository>
       <id>java.net-m2-repository</id>

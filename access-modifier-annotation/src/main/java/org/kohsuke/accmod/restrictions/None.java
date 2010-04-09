@@ -10,7 +10,7 @@ import org.kohsuke.accmod.impl.RestrictedElement;
  *
  * @author Kohsuke Kawaguchi
  */
-public class None implements AccessRestriction {
+public class None extends AccessRestriction {
     public void usedAsSuperType(Location loc, RestrictedElement target, ErrorListener errorListener) {
     }
 
