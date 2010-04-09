@@ -273,7 +273,7 @@ public class Checker {
                  */
                 private final Location currentLocation = new Location() {
                     public String getClassName() {
-                        return className;
+                        return className.replace('/','.');
                     }
 
                     public String getMethodName() {
