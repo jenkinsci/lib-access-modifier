@@ -28,7 +28,7 @@
     </repository>
     <site>
       <id>kohsuke.org</id>
-      <url>scp://kohsuke.org/home/kohsuke/mainwebsite_html/access-modifier/</url>
+      <url>scp://kohsuke.org/home/kohsuke/kohsuke.org/access-modifier/</url>
     </site>
   </distributionManagement>
 
