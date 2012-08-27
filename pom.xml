@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.kohsuke</groupId>
+  <parent>
+    <groupId>org.kohsuke</groupId>
+    <artifactId>pom</artifactId>
+    <version>3</version>
+  </parent>
+
   <artifactId>access-modifier</artifactId>
   <version>1.2-SNAPSHOT</version>
 
@@ -14,18 +19,7 @@
     <module>access-modifier-checker</module>
   </modules>
 
-  <repositories>
-    <repository>
-      <id>java.net2</id>
-      <url>http://maven.dyndns.org/2/</url>
-    </repository>
-  </repositories>
-
   <distributionManagement>
-    <repository>
-      <id>java.net-m2-repository</id>
-      <url>java-net:/maven2-repository/trunk/repository/</url>
-    </repository>
     <site>
       <id>kohsuke.org</id>
       <url>scp://kohsuke.org/home/kohsuke/kohsuke.org/access-modifier/</url>
