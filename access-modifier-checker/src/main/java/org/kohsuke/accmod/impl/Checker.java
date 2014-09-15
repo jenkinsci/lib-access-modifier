@@ -28,12 +28,12 @@ import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.impl.Restrictions.Parser;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.EmptyVisitor;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -138,7 +138,7 @@ public class Checker {
             }
 
             try {
-                new ClassReader(is).accept(new EmptyVisitor() {
+                new ClassReader(is).accept(new ClassVisitor(Opcodes.ASM5) {
                     private String className;
 
                     @Override
@@ -153,7 +153,7 @@ public class Checker {
 
                     @Override
                     public FieldVisitor visitField(int access, final String name, String desc, String signature, Object value) {
-                        return new EmptyVisitor() {
+                        return new FieldVisitor(Opcodes.ASM5) {
                             @Override
                             public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
                                 return onAnnotationFor(className+'.'+name,desc);
@@ -163,7 +163,7 @@ public class Checker {
 
                     @Override
                     public MethodVisitor visitMethod(int access, final String methodName, final String methodDesc, String signature, String[] exceptions) {
-                        return new EmptyVisitor() {
+                        return new MethodVisitor(Opcodes.ASM5) {
                             @Override
                             public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
                                 return onAnnotationFor(className+'.'+methodName+methodDesc,desc);
@@ -221,7 +221,7 @@ public class Checker {
         FileInputStream in = new FileInputStream(clazz);
         try {
             ClassReader cr = new ClassReader(in);
-            cr.accept(new EmptyVisitor() {
+            cr.accept(new ClassVisitor(Opcodes.ASM5) {
                 private String className;
                 private String methodName,methodDesc;
                 private int line;
@@ -243,7 +243,7 @@ public class Checker {
                 public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
                     this.methodName  = name;
                     this.methodDesc = desc;
-                    return new EmptyVisitor() {
+                    return new MethodVisitor(Opcodes.ASM5) {
                         @Override
                         public void visitLineNumber(int _line, Label start) {
                             line = _line;

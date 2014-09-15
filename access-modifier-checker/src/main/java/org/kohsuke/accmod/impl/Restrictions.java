@@ -25,6 +25,7 @@ package org.kohsuke.accmod.impl;
 
 import org.kohsuke.accmod.AccessRestriction;
 import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 import java.util.ArrayList;
@@ -83,11 +84,12 @@ public class Restrictions extends ArrayList<AccessRestriction> {
         public String toString() { return "NONE"; }
     });
 
-    abstract static class Parser implements AnnotationVisitor {
+    abstract static class Parser extends AnnotationVisitor {
         private List<Type> restrictions = new ArrayList<Type>();
         private final RestrictedElement target;
 
         protected Parser(RestrictedElement target) {
+            super(Opcodes.ASM5);
             this.target = target;
         }
 
