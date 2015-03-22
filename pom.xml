@@ -21,8 +21,8 @@
 
   <distributionManagement>
     <site>
-      <id>kohsuke.org</id>
-      <url>scp://kohsuke.org/home/kohsuke/kohsuke.org/access-modifier/</url>
+      <id>github-pages</id>
+      <url>gitsite:git@github.com/kohsuke/${project.artifactId}.git</url>
     </site>
   </distributionManagement>
 
