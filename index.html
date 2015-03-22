@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+
+
+
+
+
+
+
+
+<html>
+  <head>
+    <title>Custom Access Modifier - </title>
+    <style type="text/css" media="all">
+      @import url("./css/maven-base.css");
+      @import url("./css/maven-theme.css");
+      @import url("./css/1024px.css");
+      @import url("./css/site.css");
+    </style>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      </head>
+  <body>
+    <div id="wrap2"><div id="wrap">
+    <div id="header">
+      <p id="toplinks">Skip to: <a href="#content">Content</a> | <a href="#sidebar">Navigation</a> | <a href="#footer">Footer</a></p>
+		
+            <h1 id="bannerLeft">
+          <a href="./">
+    
+            Custom Access Modifier
+    
+            </a>
+        </h1>
+                
+      <p id="slogan">Extensible application-specific access modifiers for Java</p>
+    </div>
+    <div id="breadcrumbs">
+      <div class="xright">  </div>
+      <div class="clear">
+        <hr/>
+      </div>
+    </div>
+
+    <div id="sidebar">
+      <div id="navcolumn">
+              <h2>
+          Custom Access Modifier
+        </h2><ul>
+              
+    <li class="none">
+              <strong>Introduction</strong>
+        </li>
+              
+    <li class="none">
+              <a href="http://maven.dyndns.org/2/org/kohsuke/access-modifier/">Download</a>
+        </li>
+          </ul>
+      <h2>
+          References
+        </h2><ul>
+              
+    <li class="none">
+              <a href="apidocs/index.html">Javadoc</a>
+        </li>
+          </ul>
+      <h2>
+          Project Documentation
+        </h2><ul>
+              
+                
+              
+      
+            
+      
+            
+      
+            
+            
+            
+      
+            
+      
+            
+      
+            
+      
+            
+      
+            
+      
+            
+      
+              
+            <li class="expanded">
+              <a href="project-info.html">Project Information</a>
+                <ul>
+                  
+    <li class="none">
+              <a href="dependency-convergence.html">Dependency Convergence</a>
+        </li>
+                  
+    <li class="none">
+              <a href="dependency-info.html">Dependency Information</a>
+        </li>
+                  
+    <li class="none">
+              <a href="distribution-management.html">Distribution Management</a>
+        </li>
+                  
+    <li class="none">
+              <strong>About</strong>
+        </li>
+                  
+    <li class="none">
+              <a href="license.html">Project License</a>
+        </li>
+                  
+    <li class="none">
+              <a href="modules.html">Project Modules</a>
+        </li>
+                  
+    <li class="none">
+              <a href="plugin-management.html">Plugin Management</a>
+        </li>
+                  
+    <li class="none">
+              <a href="plugins.html">Project Plugins</a>
+        </li>
+                  
+    <li class="none">
+              <a href="team-list.html">Project Team</a>
+        </li>
+                  
+    <li class="none">
+              <a href="source-repository.html">Source Repository</a>
+        </li>
+                  
+    <li class="none">
+              <a href="project-summary.html">Project Summary</a>
+        </li>
+              </ul>
+        </li>
+              
+                
+              
+      
+              
+        <li class="collapsed">
+              <a href="project-reports.html">Project Reports</a>
+              </li>
+          </ul>
+        </div>
+    </div>
+    <div id="content">
+      <div id="contentBox">
+        <div class="section">
+<h2>What is this?<a name="What_is_this"></a></h2>
+<p>This library defines an annotation and extensible mechanism to let you define your own access modifiers. Those additional custom access modifiers can be enforced when you compile other source files that refer them.</p>
+<p>For example, consider a deprecated feature in your library that you plan to remove in a near future. If you just put <tt>@Deprecated</tt>, code can be still written to use them quite casually (I still often use <tt>Date.toGMTString()</tt>, for example.) But if you remove it, it'll break existing applications out there. Custom access modifier can fix this. With the following annotation on your method, you can flag an error whenever someone tries to call this method.</p>
+<div>
+<pre>public class Library {
+    @Deprecated @Restricted(DoNotUse.class)
+    public void foo() {
+        ...
+    }
+}</pre></div>
+<p>These checks are not enforced during the runtime, so in this way, you can keep the old application working, and at the same time prevent the new code from using this feature. (I should point out that technically speaking the enforcement is optional, even during the compile time --- after all, it's just a semantics imposed by a library external to Javac.)</p></div>
+<div class="section">
+<h2>Extensible Access Modifiers<a name="Extensible_Access_Modifiers"></a></h2>
+<p>The library comes with a few built-in access modifiers, but your application can define your own by extending the <tt>AccessRestriction</tt> type. For example, maybe you want to allow read but prevent write to a field. Maybe you want to only allow certain methods to be called from within the constructor (or the other way around.)</p>
+<p>There's a lot of freedom.</p></div>
+<div class="section">
+<h2>Enforcing Access Modifiers<a name="Enforcing_Access_Modifiers"></a></h2>
+<p>Currently we provide a Maven mojo to enforce access modifiers. Use it like the following:</p>
+<div>
+<pre>      &lt;plugin&gt;
+        &lt;groupId&gt;org.kohsuke&lt;/groupId&gt;
+        &lt;artifactId&gt;access-modifier-checker&lt;/artifactId&gt;
+        &lt;version&gt;1.0&lt;/version&gt;
+        &lt;executions&gt;
+          &lt;execution&gt;
+            &lt;goals&gt;
+              &lt;goal&gt;enforce&lt;/goal&gt;
+            &lt;/goals&gt;
+          &lt;/execution&gt;
+        &lt;/executions&gt;
+      &lt;/plugin&gt;</pre></div></div>
+      </div>
+    </div>
+    <div id="footer">
+      <div class="xright">&#169;  
+          2015
+    
+          
+  
+
+  
+  
+  &nbsp;| Last Published: 2015-03-22
+  &nbsp;| Version: 1.6
+</div>
+      <div class="clear">
+        <hr/>
+      </div>
+    </div>
+    </div></div>
+  </body>
+</html>
