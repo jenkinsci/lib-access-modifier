@@ -1,0 +1,26 @@
+-classpath
+'/home/kohsuke/ws/access-modifier/target/checkout/access-modifier-annotation/target/classes:/files/kohsuke/.m2/repository/org/jenkins-ci/annotation-indexer/1.4/annotation-indexer-1.4.jar'
+-encoding
+'UTF-8'
+-protected
+-sourcepath
+'/home/kohsuke/ws/access-modifier/target/checkout/access-modifier-annotation/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2015. All Rights Reserved.'
+-charset
+'UTF-8'
+-d
+'/home/kohsuke/ws/access-modifier/target/checkout/access-modifier-annotation/target/site/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'Custom Acess Modifier annotations 1.7 API'
+-link
+'http://java.sun.com/j2se/1.5.0/docs/api'
+-linkoffline
+'http://kohsuke.org/access-modifier/access-modifier-checker/apidocs' '/home/kohsuke/ws/access-modifier/target/checkout/access-modifier-checker/target/site/apidocs'
+-use
+-version
+-windowtitle
+'Custom Acess Modifier annotations 1.7 API'
