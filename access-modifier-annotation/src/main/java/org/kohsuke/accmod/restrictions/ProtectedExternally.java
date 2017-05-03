@@ -42,6 +42,7 @@ import org.objectweb.asm.Opcodes;
  * Akin to using the {@code protected} modifier but allowing “package” access elsewhere in the same package root, and also supporting interface methods.
  * Note that {@link Restricted} is not {@link Inherited} so this only protects attempted accesses via the defining type;
  * you will generally also want to restrict the implementations (for example as {@link DoNotUse}).
+ * @since FIXME
  */
 public class ProtectedExternally extends None {
 
