@@ -257,7 +257,7 @@ public class Checker {
                         }
 
                         @Override
-                        public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+                        public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
                             getRestrictions(owner+'.'+name+desc).invoked(currentLocation,errorListener);
                         }
 
