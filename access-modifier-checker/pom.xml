@@ -4,7 +4,7 @@
   <parent>
     <artifactId>access-modifier</artifactId>
     <groupId>org.kohsuke</groupId>
-    <version>1.8-SNAPSHOT</version>
+    <version>1.8</version>
   </parent>
   <artifactId>access-modifier-checker</artifactId>
   <packaging>maven-plugin</packaging>
@@ -69,7 +69,7 @@
                 <configuration>
                   <propertyName>repository.proxy.url</propertyName>
                   <repositories>
-                    <proxyRepo/>
+                    <proxyRepo />
                   </repositories>
                 </configuration>
               </execution>
