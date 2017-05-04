@@ -1,5 +1,5 @@
 -classpath
-'/home/kohsuke/ws/access-modifier/target/checkout/target/classes:/home/kohsuke/ws/access-modifier/target/checkout/access-modifier-annotation/target/classes:/home/kohsuke/ws/access-modifier/target/checkout/access-modifier-checker/target/classes:/files/kohsuke/.m2/repository/org/apache/maven/maven-profile/2.0.1/maven-profile-2.0.1.jar:/files/kohsuke/.m2/repository/org/codehaus/plexus/plexus-container-default/1.0-alpha-9/plexus-container-default-1.0-alpha-9.jar:/files/kohsuke/.m2/repository/org/apache/maven/maven-repository-metadata/2.0.1/maven-repository-metadata-2.0.1.jar:/files/kohsuke/.m2/repository/org/apache/maven/maven-artifact-manager/2.0.1/maven-artifact-manager-2.0.1.jar:/home/kohsuke/ws/access-modifier/target/checkout/access-modifier-annotation/target/classes:/files/kohsuke/.m2/repository/org/kohsuke/metainf-services/metainf-services/1.1/metainf-services-1.1.jar:/files/kohsuke/.m2/repository/org/ow2/asm/asm-debug-all/5.0.3/asm-debug-all-5.0.3.jar:/files/kohsuke/.m2/repository/org/apache/maven/maven-project/2.0.1/maven-project-2.0.1.jar:/files/kohsuke/.m2/repository/org/jenkins-ci/annotation-indexer/1.4/annotation-indexer-1.4.jar:/files/kohsuke/.m2/repository/org/apache/maven/maven-artifact/2.0.1/maven-artifact-2.0.1.jar:/files/kohsuke/.m2/repository/org/apache/maven/maven-plugin-api/2.0.1/maven-plugin-api-2.0.1.jar:/files/kohsuke/.m2/repository/org/apache/maven/wagon/wagon-provider-api/1.0-alpha-5/wagon-provider-api-1.0-alpha-5.jar:/files/kohsuke/.m2/repository/classworlds/classworlds/1.1-alpha-2/classworlds-1.1-alpha-2.jar:/files/kohsuke/.m2/repository/org/codehaus/plexus/plexus-utils/1.0.5/plexus-utils-1.0.5.jar:/files/kohsuke/.m2/repository/org/apache/maven/maven-model/2.0.1/maven-model-2.0.1.jar'
+'/home/kohsuke/ws/access-modifier/target/checkout/target/classes:/home/kohsuke/ws/access-modifier/target/checkout/access-modifier-annotation/target/classes:/home/kohsuke/ws/access-modifier/target/checkout/access-modifier-checker/target/classes:/home/kohsuke/.m2/repository/org/apache/maven/maven-profile/2.0.1/maven-profile-2.0.1.jar:/home/kohsuke/.m2/repository/org/codehaus/plexus/plexus-container-default/1.0-alpha-9/plexus-container-default-1.0-alpha-9.jar:/home/kohsuke/.m2/repository/org/apache/maven/maven-repository-metadata/2.0.1/maven-repository-metadata-2.0.1.jar:/home/kohsuke/.m2/repository/org/apache/maven/maven-artifact-manager/2.0.1/maven-artifact-manager-2.0.1.jar:/home/kohsuke/ws/access-modifier/target/checkout/access-modifier-annotation/target/classes:/home/kohsuke/.m2/repository/org/kohsuke/metainf-services/metainf-services/1.1/metainf-services-1.1.jar:/home/kohsuke/.m2/repository/org/ow2/asm/asm-debug-all/5.0.3/asm-debug-all-5.0.3.jar:/home/kohsuke/.m2/repository/org/apache/maven/maven-project/2.0.1/maven-project-2.0.1.jar:/home/kohsuke/.m2/repository/org/jenkins-ci/annotation-indexer/1.4/annotation-indexer-1.4.jar:/home/kohsuke/.m2/repository/org/apache/maven/maven-artifact/2.0.1/maven-artifact-2.0.1.jar:/home/kohsuke/.m2/repository/org/apache/maven/maven-plugin-api/2.0.1/maven-plugin-api-2.0.1.jar:/home/kohsuke/.m2/repository/org/apache/maven/wagon/wagon-provider-api/1.0-alpha-5/wagon-provider-api-1.0-alpha-5.jar:/home/kohsuke/.m2/repository/classworlds/classworlds/1.1-alpha-2/classworlds-1.1-alpha-2.jar:/home/kohsuke/.m2/repository/org/codehaus/plexus/plexus-utils/1.0.5/plexus-utils-1.0.5.jar:/home/kohsuke/.m2/repository/org/apache/maven/maven-model/2.0.1/maven-model-2.0.1.jar'
 -encoding
 'UTF-8'
 -protected
@@ -7,7 +7,7 @@
 '/home/kohsuke/ws/access-modifier/target/checkout/access-modifier-annotation/src/main/java:/home/kohsuke/ws/access-modifier/target/checkout/access-modifier-checker/src/main/java'
 -author
 -bottom
-'Copyright &#169; 2015. All Rights Reserved.'
+'Copyright &#169; 2017. All Rights Reserved.'
 -charset
 'UTF-8'
 -d
@@ -15,10 +15,10 @@
 -docencoding
 'UTF-8'
 -doctitle
-'Custom access modifier for Java 1.7 API'
+'Custom access modifier for Java 1.8 API'
 -link
 'http://java.sun.com/j2se/1.5.0/docs/api'
 -use
 -version
 -windowtitle
-'Custom access modifier for Java 1.7 API'
+'Custom access modifier for Java 1.8 API'
