@@ -56,4 +56,29 @@
       <url>http://www.opensource.org/licenses/mit-license.php</url>
     </license>
   </licenses>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm-debug-all</artifactId>
+        <version>5.0.3</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
 </project>
