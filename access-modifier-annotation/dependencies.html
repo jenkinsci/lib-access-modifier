@@ -60,7 +60,7 @@
 <th>ArtifactId</th>
 <th>Version</th>
 <th>Type</th>
-<th>License</th></tr>
+<th>Licenses</th></tr>
 <tr class="b">
 <td>org.jenkins-ci</td>
 <td><a class="externalLink" href="http://jenkins-ci.org/annotation-indexer/">annotation-indexer</a></td>
@@ -76,7 +76,7 @@
 <th>ArtifactId</th>
 <th>Version</th>
 <th>Type</th>
-<th>License</th></tr>
+<th>Licenses</th></tr>
 <tr class="b">
 <td>junit</td>
 <td><a class="externalLink" href="http://junit.org">junit</a></td>
@@ -87,8 +87,9 @@
 <h2>Project Transitive Dependencies<a name="Project_Transitive_Dependencies"></a></h2>
 <p>No transitive dependencies are required for this project.</p></div><a name="Project_Dependency_Graph"></a>
 <div class="section">
-<h2>Project Dependency Graph<a name="Project_Dependency_Graph"></a></h2><script language="javascript" type="text/javascript">
-      function toggleDependencyDetail( divId, imgId )
+<h2>Project Dependency Graph<a name="Project_Dependency_Graph"></a></h2>
+<script language="javascript" type="text/javascript">
+      function toggleDependencyDetails( divId, imgId )
       {
         var div = document.getElementById( divId );
         var img = document.getElementById( imgId );
@@ -96,11 +97,13 @@
         {
           div.style.display = 'none';
           img.src='./images/icon_info_sml.gif';
+          img.alt='[Information]';
         }
         else
         {
           div.style.display = '';
           img.src='./images/close.gif';
+          img.alt='[Close]';
         }
       }
 </script>
@@ -108,7 +111,7 @@
 <div class="section">
 <h3>Dependency Tree<a name="Dependency_Tree"></a></h3>
 <ul>
-<li>org.kohsuke:access-modifier-annotation:jar:1.7 <img id="_img1" src="./images/icon_info_sml.gif" alt="Information" onclick="toggleDependencyDetail( '_dep0', '_img1' );" style="cursor: pointer;vertical-align:text-bottom;"></img><div id="_dep0" style="display:none">
+<li>org.kohsuke:access-modifier-annotation:jar:1.8 <img id="_img1" src="./images/icon_info_sml.gif" alt="[Information]" onclick="toggleDependencyDetails( '_dep0', '_img1' );" style="cursor: pointer; vertical-align: text-bottom;"></img><div id="_dep0" style="display:none">
 <table border="0" class="bodyTable">
 <tr class="a">
 <th>Custom Acess Modifier annotations</th></tr>
@@ -116,9 +119,9 @@
 <td>
 <p><b>Description: </b>Extensible application-specific access modifiers for Java</p>
 <p><b>URL: </b><a class="externalLink" href="http://kohsuke.org/access-modifier/access-modifier-annotation/">http://kohsuke.org/access-modifier/access-modifier-annotation/</a></p>
-<p><b>Project License: </b><a class="externalLink" href="http://www.opensource.org/licenses/mit-license.php">MIT License</a></p></td></tr></table></div>
+<p><b>Project Licenses: </b><a class="externalLink" href="http://www.opensource.org/licenses/mit-license.php">MIT License</a></p></td></tr></table></div>
 <ul>
-<li>org.jenkins-ci:annotation-indexer:jar:1.4 (compile) <img id="_img3" src="./images/icon_info_sml.gif" alt="Information" onclick="toggleDependencyDetail( '_dep2', '_img3' );" style="cursor: pointer;vertical-align:text-bottom;"></img><div id="_dep2" style="display:none">
+<li>org.jenkins-ci:annotation-indexer:jar:1.4 (compile) <img id="_img3" src="./images/icon_info_sml.gif" alt="[Information]" onclick="toggleDependencyDetails( '_dep2', '_img3' );" style="cursor: pointer; vertical-align: text-bottom;"></img><div id="_dep2" style="display:none">
 <table border="0" class="bodyTable">
 <tr class="a">
 <th>Annotation Indexer</th></tr>
@@ -126,8 +129,8 @@
 <td>
 <p><b>Description: </b>Creates index of annotations.</p>
 <p><b>URL: </b><a class="externalLink" href="http://jenkins-ci.org/annotation-indexer/">http://jenkins-ci.org/annotation-indexer/</a></p>
-<p><b>Project License: </b><a class="externalLink" href="http://jenkins-ci.org/mit-license">MIT License</a></p></td></tr></table></div></li>
-<li>junit:junit:jar:3.8.1 (test) <img id="_img5" src="./images/icon_info_sml.gif" alt="Information" onclick="toggleDependencyDetail( '_dep4', '_img5' );" style="cursor: pointer;vertical-align:text-bottom;"></img><div id="_dep4" style="display:none">
+<p><b>Project Licenses: </b><a class="externalLink" href="http://jenkins-ci.org/mit-license">MIT License</a></p></td></tr></table></div></li>
+<li>junit:junit:jar:3.8.1 (test) <img id="_img5" src="./images/icon_info_sml.gif" alt="[Information]" onclick="toggleDependencyDetails( '_dep4', '_img5' );" style="cursor: pointer; vertical-align: text-bottom;"></img><div id="_dep4" style="display:none">
 <table border="0" class="bodyTable">
 <tr class="a">
 <th>JUnit</th></tr>
@@ -135,7 +138,7 @@
 <td>
 <p><b>Description: </b>JUnit is a regression testing framework written by Erich Gamma and Kent Beck. It is used by the developer who implements unit tests in Java.</p>
 <p><b>URL: </b><a class="externalLink" href="http://junit.org">http://junit.org</a></p>
-<p><b>Project License: </b><a class="externalLink" href="http://www.opensource.org/licenses/cpl1.0.txt">Common Public License Version 1.0</a></p></td></tr></table></div></li></ul></li></ul></div></div><a name="Licenses"></a>
+<p><b>Project Licenses: </b><a class="externalLink" href="http://www.opensource.org/licenses/cpl1.0.txt">Common Public License Version 1.0</a></p></td></tr></table></div></li></ul></li></ul></div></div><a name="Licenses"></a>
 <div class="section">
 <h2>Licenses<a name="Licenses"></a></h2>
 <p><b>Common Public License Version 1.0: </b>JUnit</p>
@@ -153,7 +156,7 @@
 <th title="Indicates whether these dependencies have been compiled with debug information.">Debug Information</th></tr>
 <tr class="b">
 <td>junit-3.8.1.jar</td>
-<td>121.07 kB</td>
+<td>121.1 kB</td>
 <td>119</td>
 <td>100</td>
 <td>6</td>
@@ -161,7 +164,7 @@
 <td>Yes</td></tr>
 <tr class="a">
 <td>annotation-indexer-1.4.jar</td>
-<td>16.09 kB</td>
+<td>16.1 kB</td>
 <td>24</td>
 <td>11</td>
 <td>1</td>
@@ -177,7 +180,7 @@
 <th>Debug Information</th></tr>
 <tr class="a">
 <td>2</td>
-<td>137.16 kB</td>
+<td>137.2 kB</td>
 <td>143</td>
 <td>111</td>
 <td>7</td>
@@ -185,7 +188,7 @@
 <td>2</td></tr>
 <tr class="b">
 <td>compile: 1</td>
-<td>compile: 16.09 kB</td>
+<td>compile: 16.1 kB</td>
 <td>compile: 24</td>
 <td>compile: 11</td>
 <td>compile: 1</td>
@@ -193,7 +196,7 @@
 <td>compile: 1</td></tr>
 <tr class="a">
 <td>test: 1</td>
-<td>test: 121.07 kB</td>
+<td>test: 121.1 kB</td>
 <td>test: 119</td>
 <td>test: 100</td>
 <td>test: 6</td>
@@ -210,7 +213,7 @@
 <th>Blacklisted</th></tr>
 <tr class="b">
 <td>central</td>
-<td><a class="externalLink" href="http://repo.maven.apache.org/maven2">http://repo.maven.apache.org/maven2</a></td>
+<td><a class="externalLink" href="https://repo.maven.apache.org/maven2">https://repo.maven.apache.org/maven2</a></td>
 <td>Yes</td>
 <td>No</td>
 <td>Yes</td></tr></table>
@@ -230,15 +233,15 @@
     </div>
     <div id="footer">
       <div class="xright">&#169;  
-          2015
+          2017
     
           
   
 
   
   
-  &nbsp;| Last Published: 2015-03-22
-  &nbsp;| Version: 1.7
+  &nbsp;| Last Published: 2017-05-04
+  &nbsp;| Version: 1.8
 </div>
       <div class="clear">
         <hr/>
