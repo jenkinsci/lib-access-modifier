@@ -38,5 +38,13 @@ public interface RestrictedElement {
      */
     boolean isInTheInspectedModule();
 
+    /**
+     * Returns true if the given {@link Location} is actually in <code>this</code>.
+     *
+     * @param location the location to be tested.
+     * @return true if the given {@link Location} is actually in <code>this</code>.
+     */
+    boolean isSameClass(Location location);
+
     String toString();
 }

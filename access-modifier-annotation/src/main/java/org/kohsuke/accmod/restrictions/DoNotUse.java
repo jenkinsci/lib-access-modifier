@@ -35,26 +35,44 @@ import org.kohsuke.accmod.impl.RestrictedElement;
  */
 public class DoNotUse extends AccessRestriction {
     public void written(Location loc, RestrictedElement target, ErrorListener errorListener) {
+        if (target.isSameClass(loc)) {
+            return;
+        }
         error(loc,target,errorListener);
     }
 
     public void usedAsSuperType(Location loc, RestrictedElement target, ErrorListener errorListener) {
+        if (target.isSameClass(loc)) {
+            return;
+        }
         error(loc,target,errorListener);
     }
 
     public void usedAsInterface(Location loc, RestrictedElement target, ErrorListener errorListener) {
+        if (target.isSameClass(loc)) {
+            return;
+        }
         error(loc,target,errorListener);
     }
 
     public void instantiated(Location loc, RestrictedElement target, ErrorListener errorListener) {
+        if (target.isSameClass(loc)) {
+            return;
+        }
         error(loc,target,errorListener);
     }
 
     public void invoked(Location loc, RestrictedElement target, ErrorListener errorListener) {
+        if (target.isSameClass(loc)) {
+            return;
+        }
         error(loc,target,errorListener);
     }
 
     public void read(Location loc, RestrictedElement target, ErrorListener errorListener) {
+        if (target.isSameClass(loc)) {
+            return;
+        }
         error(loc,target,errorListener);
     }
 

@@ -176,13 +176,7 @@ public class Checker {
                      */
                     private AnnotationVisitor onAnnotationFor(final String keyName, String desc) {
                         if (RESTRICTED_DESCRIPTOR.equals(desc)) {
-                            RestrictedElement target = new RestrictedElement() {
-                                public boolean isInTheInspectedModule() {
-                                    return isInTheInspectedModule;
-                                }
-
-                                public String toString() { return keyName; }
-                            };
+                            RestrictedElement target = new RestrictedElementImpl(isInTheInspectedModule, keyName);
                             return new Parser(target) {
                                 @Override
                                 public void visitEnd() {
