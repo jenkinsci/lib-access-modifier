@@ -28,7 +28,7 @@ import org.jvnet.hudson.annotation_indexer.Indexed;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
-import static java.lang.annotation.RetentionPolicy.CLASS;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Indicates that a particular element is really deprecated and that the access to it
@@ -40,7 +40,7 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
  *
  * @author Kohsuke Kawaguchi
  */
-@Retention(CLASS)
+@Retention(RUNTIME)
 @Documented
 @Indexed
 public @interface Restricted {
