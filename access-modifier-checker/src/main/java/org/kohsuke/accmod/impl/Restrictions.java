@@ -81,6 +81,12 @@ public class Restrictions extends ArrayList<AccessRestriction> {
 
     public static final Restrictions NONE = new Restrictions(new RestrictedElement() {
         public boolean isInTheInspectedModule() { return false; }
+
+        @Override
+        public boolean isSameClass(Location location) {
+            return false;
+        }
+
         public String toString() { return "NONE"; }
     });
 

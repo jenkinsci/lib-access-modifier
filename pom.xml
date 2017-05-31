@@ -14,6 +14,10 @@
   <packaging>pom</packaging>
   <description>Extensible application-specific access modifiers for Java</description>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <modules>
     <module>access-modifier-annotation</module>
     <module>access-modifier-checker</module>
