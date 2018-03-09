@@ -36,7 +36,7 @@ import java.util.List;
  * @author Kohsuke Kawaguchi
  */
 public class Restrictions extends ArrayList<AccessRestriction> {
-    private final RestrictedElement target;
+    final RestrictedElement target;
 
     public Restrictions(RestrictedElement target, Collection<? extends AccessRestriction> c) {
         super(c);
@@ -76,13 +76,6 @@ public class Restrictions extends ArrayList<AccessRestriction> {
         for (AccessRestriction ar : this)
             ar.written(location,target,errorListener);
     }
-
-
-
-    public static final Restrictions NONE = new Restrictions(new RestrictedElement() {
-        public boolean isInTheInspectedModule() { return false; }
-        public String toString() { return "NONE"; }
-    });
 
     abstract static class Parser extends AnnotationVisitor {
         private List<Type> restrictions = new ArrayList<Type>();

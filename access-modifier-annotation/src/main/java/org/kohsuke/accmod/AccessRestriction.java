@@ -85,6 +85,13 @@ public abstract class AccessRestriction {
      */
     public abstract void written(Location loc, RestrictedElement target, ErrorListener errorListener);
 
+    /**
+     * Whether this access restriction, if applied to a type, should also be considered to apply implicitly to all transitively nested members.
+     * @return by default, false
+     */
+    public boolean appliesToNested() {
+        return false;
+    }
 
     /**
      * {@link AccessRestriction} that imposes no restriction.

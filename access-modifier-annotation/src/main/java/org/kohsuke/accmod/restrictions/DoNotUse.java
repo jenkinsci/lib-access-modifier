@@ -61,4 +61,10 @@ public class DoNotUse extends AccessRestriction {
     public void error(Location loc, RestrictedElement target, ErrorListener errorListener) {
         errorListener.onError(null,loc,target+" must not be used");
     }
+
+    @Override
+    public boolean appliesToNested() {
+        return true;
+    }
+
 }
