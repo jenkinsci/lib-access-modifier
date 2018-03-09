@@ -42,8 +42,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
@@ -230,12 +233,18 @@ public class Checker {
                 public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
                     this.className = name;
 
-                    if (superName!=null)
-                        getRestrictions(superName).usedAsSuperType(currentLocation,errorListener);
+                    if (superName != null) {
+                        for (Restrictions r : getRestrictions(superName)) {
+                            r.usedAsSuperType(currentLocation, errorListener);
+                        }
+                    }
 
-                    if (interfaces!=null) {
-                        for (String intf : interfaces)
-                            getRestrictions(intf).usedAsInterface(currentLocation,errorListener);
+                    if (interfaces != null) {
+                        for (String intf : interfaces) {
+                            for (Restrictions r : getRestrictions(intf)) {
+                                r.usedAsInterface(currentLocation, errorListener);
+                            }
+                        }
                     }
                 }
 
@@ -252,26 +261,34 @@ public class Checker {
                         public void visitTypeInsn(int opcode, String type) {
                             switch (opcode) {
                             case Opcodes.NEW:
-                                getRestrictions(type).instantiated(currentLocation,errorListener);
+                                for (Restrictions r : getRestrictions(type)) {
+                                    r.instantiated(currentLocation, errorListener);
+                                }
                             }
                         }
 
                         @Override
                         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-                            getRestrictions(owner+'.'+name+desc).invoked(currentLocation,errorListener);
+                            for (Restrictions r : getRestrictions(owner + '.' + name + desc)) {
+                                r.invoked(currentLocation, errorListener);
+                            }
                         }
 
                         @Override
                         public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-                            Restrictions r = getRestrictions(owner + '.' + name);
+                            Iterable<Restrictions> rs = getRestrictions(owner + '.' + name);
                             switch (opcode) {
                             case Opcodes.GETSTATIC:
                             case Opcodes.GETFIELD:
-                                r.read(currentLocation,errorListener);
+                                for (Restrictions r : rs) {
+                                    r.read(currentLocation, errorListener);
+                                }
                                 break;
                             case Opcodes.PUTSTATIC:
                             case Opcodes.PUTFIELD:
-                                r.written(currentLocation,errorListener);
+                                for (Restrictions r : rs) {
+                                    r.written(currentLocation, errorListener);
+                                }
                                 break;
                             }
                             super.visitFieldInsn(opcode, owner, name, desc);
@@ -319,10 +336,37 @@ public class Checker {
         }
     }
 
-    private Restrictions getRestrictions(String keyName) {
+    private Iterable<Restrictions> getRestrictions(String keyName) {
+        List<Restrictions> rs = new ArrayList<>();
         Restrictions r = restrictions.get(keyName);
-        if (r==null)    return Restrictions.NONE;
-        return r;
+        if (r != null) {
+            rs.add(r);
+        }
+        int idx = Integer.MAX_VALUE;
+        while (true) {
+            int newIdx = keyName.lastIndexOf('.', idx);
+            if (newIdx == -1) {
+                newIdx = keyName.lastIndexOf('$', idx);
+                if (newIdx == -1) {
+                    break;
+                }
+            }
+            idx = newIdx;
+            keyName = keyName.substring(0, idx);
+            r = restrictions.get(keyName);
+            if (r != null) {
+                Collection<AccessRestriction> applicable = new ArrayList<>();
+                for (AccessRestriction ar : r) {
+                    if (ar.appliesToNested()) {
+                        applicable.add(ar);
+                    }
+                }
+                if (!applicable.isEmpty()) {
+                    rs.add(new Restrictions(r.target, applicable));
+                }
+            }
+        }
+        return rs;
     }
 
     private static final String RESTRICTED_DESCRIPTOR = Type.getDescriptor(Restricted.class);
