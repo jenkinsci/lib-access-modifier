@@ -8,7 +8,7 @@
   </parent>
   <artifactId>access-modifier-annotation</artifactId>
 
-  <name>Custom Acess Modifier annotations</name>
+  <name>Custom Access Modifier annotations</name>
 
   <dependencies>
     <dependency>
