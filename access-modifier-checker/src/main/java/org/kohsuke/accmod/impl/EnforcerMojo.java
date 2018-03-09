@@ -35,7 +35,23 @@ public class EnforcerMojo extends AbstractMojo {
      */
     protected MavenProject project;
 
+    /**
+     * If true, skip running the checker entirely.
+     * @parameter expression="${access-modifier-checker.skip}" default-value="false"
+     */
+    private boolean skip;
+
+    /**
+     * If false, print warnings about violations but do not fail the build.
+     * @parameter expression="${access-modifier-checker.failOnError}" default-value="true"
+     */
+    private boolean failOnError = true;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (skip) {
+            getLog().info("Skipping access modifier checks");
+            return;
+        }
         try {
             File outputDir = new File(project.getBuild().getOutputDirectory());
 
@@ -49,7 +65,12 @@ public class EnforcerMojo extends AbstractMojo {
             Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[dependencies.size()]), getClass().getClassLoader()),
                 new ErrorListener() {
                     public void onError(Throwable t, Location loc, String msg) {
-                        getLog().error(loc+" "+msg,t);
+                        String locMsg = loc+" "+msg;
+                        if (failOnError) {
+                            getLog().error(locMsg, t);
+                        } else {
+                            getLog().warn(locMsg, t);
+                        }
                         failed[0] = true;
                     }
 
@@ -70,8 +91,14 @@ public class EnforcerMojo extends AbstractMojo {
 
             // perform checks
             checker.check(outputDir);
-            if (failed[0])
-                throw new MojoFailureException("Access modifier checks failed. See the details above");
+            if (failed[0]) {
+                String message = "Access modifier checks failed. See the details above";
+                if (failOnError) {
+                    throw new MojoFailureException(message);
+                } else {
+                    getLog().warn(message);
+                }
+            }
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to enforce @Restricted constraints",e);
         }
