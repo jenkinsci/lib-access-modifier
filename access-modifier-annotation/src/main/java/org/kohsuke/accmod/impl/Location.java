@@ -74,4 +74,9 @@ public interface Location {
      * access restrictions.
      */
     ClassLoader getDependencyClassLoader();
+
+    default /*@CheckForNull*/ String getProperty(String key) {
+        return null;
+    }
+
 }

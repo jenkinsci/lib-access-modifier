@@ -15,6 +15,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Enforces the {@link Restricted} access modifier annotations.
@@ -47,6 +48,12 @@ public class EnforcerMojo extends AbstractMojo {
      */
     private boolean failOnError = true;
 
+    /**
+     * Optional properties to also make available to restriction checkers.
+     * @parameter
+     */
+    private Properties properties;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
             getLog().info("Skipping access modifier checks");
@@ -77,7 +84,7 @@ public class EnforcerMojo extends AbstractMojo {
                     public void onWarning(Throwable t, Location loc, String msg) {
                         getLog().warn(loc+" "+msg,t);
                     }
-                });
+                }, properties != null ? properties : new Properties());
 
             {// if there's restriction list in the inspected module itself, load it as well
                 InputStream self = null;
