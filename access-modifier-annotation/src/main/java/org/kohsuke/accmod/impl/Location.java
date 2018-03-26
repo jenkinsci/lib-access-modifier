@@ -75,8 +75,9 @@ public interface Location {
      */
     ClassLoader getDependencyClassLoader();
 
-    default /*@CheckForNull*/ String getProperty(String key) {
-        return null;
-    }
+    /**
+     * Loads a configuration setting from the environment, such as when configured by a Maven plugin.
+     */
+    /*@CheckForNull*/ String getProperty(String key);
 
 }
