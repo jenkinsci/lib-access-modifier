@@ -48,6 +48,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 
@@ -68,6 +69,8 @@ public class Checker {
      */
     private final ErrorListener errorListener;
 
+    private final Properties properties;
+
     /**
      * Restrictions found from dependencies.
      * <p>
@@ -83,9 +86,10 @@ public class Checker {
     private final AccessRestrictionFactory factory;
 
 
-    public Checker(ClassLoader dependencies, ErrorListener errorListener) throws IOException {
+    Checker(ClassLoader dependencies, ErrorListener errorListener, Properties properties) throws IOException {
         this.dependencies = dependencies;
         this.errorListener = errorListener;
+        this.properties = properties;
         this.factory = new AccessRestrictionFactory(dependencies);
 
         // load access restrictions
@@ -325,9 +329,9 @@ public class Checker {
                         return dependencies;
                     }
 
-                    public boolean isInTheSameModuleAs(RestrictedElement e) {
-                        // TODO
-                        throw new UnsupportedOperationException();
+                    @Override
+                    public String getProperty(String key) {
+                        return properties.getProperty(key);
                     }
                 };
             }, SKIP_FRAMES);

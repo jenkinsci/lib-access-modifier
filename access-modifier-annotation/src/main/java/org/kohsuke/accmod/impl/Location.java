@@ -74,4 +74,10 @@ public interface Location {
      * access restrictions.
      */
     ClassLoader getDependencyClassLoader();
+
+    /**
+     * Loads a configuration setting from the environment, such as when configured by a Maven plugin.
+     */
+    /*@CheckForNull*/ String getProperty(String key);
+
 }
