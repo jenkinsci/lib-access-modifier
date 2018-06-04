@@ -237,6 +237,10 @@ public class Checker {
                 public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
                     this.className = name;
 
+                    if (isSynthetic(access)) {
+                        return;
+                    }
+
                     if (superName != null) {
                         for (Restrictions r : getRestrictions(superName)) {
                             r.usedAsSuperType(currentLocation, errorListener);
@@ -256,6 +260,11 @@ public class Checker {
                 public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
                     this.methodName  = name;
                     this.methodDesc = desc;
+
+                    if (isSynthetic(access)) {
+                        return null;
+                    }
+
                     return new MethodVisitor(Opcodes.ASM5) {
                         @Override
                         public void visitLineNumber(int _line, Label start) {
@@ -374,4 +383,8 @@ public class Checker {
     }
 
     private static final String RESTRICTED_DESCRIPTOR = Type.getDescriptor(Restricted.class);
+
+    private static boolean isSynthetic(int access) {
+        return (access & Opcodes.ACC_SYNTHETIC) != 0;
+    }
 }
