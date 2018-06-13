@@ -139,30 +139,22 @@ public class Checker {
         String className;
         while ((className=r.readLine())!=null) {
 
-            final AnnotatedClassVisitor visitor = new AnnotatedClassVisitor(isInTheInspectedModule);
 
             try (InputStream is = dependencies.getResourceAsStream(className.replace('.','/') + ".class")) {
-                if (is==null) {
-                    errorListener.onWarning(null,null,"Failed to find class file for "+ className);
-                    continue;
-                }
-                new ClassReader(is).accept(visitor, ClassReader.SKIP_CODE);
-            }
-
-            String path = visitor.className;
-            final ClassVisitor packageInfoVisitor = new AnnotatedPackageVisitor(visitor.className, isInTheInspectedModule);
-
-            while (true) {
-                int i = path.lastIndexOf('/');
-                if (i < 0) break;
-                path = path.substring(0, i);
-                try (InputStream is = dependencies.getResourceAsStream(path + "/package-info.class")) {
-                    if (is != null) {
-                        new ClassReader(is).accept(packageInfoVisitor, ClassReader.SKIP_CODE);
+                if (is != null) {
+                    final ClassVisitor visitor = new AnnotatedClassVisitor(isInTheInspectedModule);
+                    new ClassReader(is).accept(visitor, ClassReader.SKIP_CODE);
+                } else {
+                    try (InputStream i = dependencies.getResourceAsStream(className.replace('.','/') + "/package-info.class")) {
+                        if (i==null) {
+                            errorListener.onWarning(null, null, "Failed to find class file for " + className);
+                            continue;
+                        }
+                        final ClassVisitor visitor = new AnnotatedPackageVisitor(className, isInTheInspectedModule);
+                        new ClassReader(i).accept(visitor, ClassReader.SKIP_CODE);
                     }
                 }
             }
-
         }
     }
 
@@ -306,11 +298,15 @@ public class Checker {
             if (newIdx == -1) {
                 newIdx = keyName.lastIndexOf('$', idx);
                 if (newIdx == -1) {
-                    break;
+                    newIdx = keyName.lastIndexOf('/', idx);
+                    if (newIdx == -1) {
+                        break;
+                    }
                 }
             }
             idx = newIdx;
             keyName = keyName.substring(0, idx);
+
             r = restrictions.get(keyName);
             if (r != null) {
                 Collection<AccessRestriction> applicable = new ArrayList<>();
@@ -432,7 +428,6 @@ public class Checker {
 
         @Override
         public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-            System.out.println("onAnnotationFor " + className + " : " + desc);
             return onAnnotationFor(className, desc);
         }
 
