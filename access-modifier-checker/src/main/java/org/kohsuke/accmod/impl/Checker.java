@@ -138,86 +138,31 @@ public class Checker {
         BufferedReader r = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
         String className;
         while ((className=r.readLine())!=null) {
-            InputStream is = dependencies.getResourceAsStream(className.replace('.','/') + ".class");
-            if (is==null) {
-                errorListener.onWarning(null,null,"Failed to find class file for "+ className);
-                continue;
+
+            final AnnotatedClassVisitor visitor = new AnnotatedClassVisitor(isInTheInspectedModule);
+
+            try (InputStream is = dependencies.getResourceAsStream(className.replace('.','/') + ".class")) {
+                if (is==null) {
+                    errorListener.onWarning(null,null,"Failed to find class file for "+ className);
+                    continue;
+                }
+                new ClassReader(is).accept(visitor, ClassReader.SKIP_CODE);
             }
 
-            try {
-                new ClassReader(is).accept(new ClassVisitor(Opcodes.ASM5) {
-                    private String className;
+            String path = visitor.className;
+            final ClassVisitor packageInfoVisitor = new AnnotatedPackageVisitor(visitor.className, isInTheInspectedModule);
 
-                    @Override
-                    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-                        this.className = name;
+            while (true) {
+                int i = path.lastIndexOf('/');
+                if (i < 0) break;
+                path = path.substring(0, i);
+                try (InputStream is = dependencies.getResourceAsStream(path + "/package-info.class")) {
+                    if (is != null) {
+                        new ClassReader(is).accept(packageInfoVisitor, ClassReader.SKIP_CODE);
                     }
-
-                    @Override
-                    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-                        return onAnnotationFor(className,desc);
-                    }
-
-                    @Override
-                    public FieldVisitor visitField(int access, final String name, String desc, String signature, Object value) {
-                        return new FieldVisitor(Opcodes.ASM5) {
-                            @Override
-                            public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-                                return onAnnotationFor(className+'.'+name,desc);
-                            }
-                        };
-                    }
-
-                    @Override
-                    public MethodVisitor visitMethod(int access, final String methodName, final String methodDesc, String signature, String[] exceptions) {
-                        return new MethodVisitor(Opcodes.ASM5) {
-                            @Override
-                            public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-                                return onAnnotationFor(className+'.'+methodName+methodDesc,desc);
-                            }
-                        };
-                    }
-
-                    /**
-                     * Parse {@link Restricted} annotation on some annotated element.
-                     */
-                    private AnnotationVisitor onAnnotationFor(final String keyName, String desc) {
-                        if (RESTRICTED_DESCRIPTOR.equals(desc)) {
-                            RestrictedElement target = new RestrictedElement() {
-                                public boolean isInTheInspectedModule() {
-                                    return isInTheInspectedModule;
-                                }
-
-                                public String toString() { return keyName; }
-                            };
-                            return new Parser(target) {
-                                @Override
-                                public void visitEnd() {
-                                    try {
-                                        restrictions.put(keyName,build(factory));
-                                    } catch (ClassNotFoundException e) {
-                                        failure(e);
-                                    } catch (InstantiationException e) {
-                                        failure(e);
-                                    } catch (IllegalAccessException e) {
-                                        failure(e);
-                                    }
-                                }
-
-                                /**
-                                 * Fails to load a {@link AccessRestriction} instance.
-                                 */
-                                private void failure(Exception e) {
-                                    errorListener.onError(e,null,"Failed to load restrictions");
-                                }
-                            };
-                        }
-                        return null;
-                    }
-                }, ClassReader.SKIP_CODE);
-            } finally {
-                is.close();
+                }
             }
+
         }
     }
 
@@ -386,5 +331,110 @@ public class Checker {
 
     private static boolean isSynthetic(int access) {
         return (access & Opcodes.ACC_SYNTHETIC) != 0;
+    }
+
+    private abstract class RestrictionsClassVisitor extends ClassVisitor {
+        private final boolean isInTheInspectedModule;
+
+        public RestrictionsClassVisitor(boolean isInTheInspectedModule) {
+            super(Opcodes.ASM5);
+            this.isInTheInspectedModule = isInTheInspectedModule;
+        }
+
+
+        /**
+         * Parse {@link Restricted} annotation on some annotated element.
+         */
+        AnnotationVisitor onAnnotationFor(final String keyName, String desc) {
+            if (RESTRICTED_DESCRIPTOR.equals(desc)) {
+                RestrictedElement target = new RestrictedElement() {
+                    public boolean isInTheInspectedModule() {
+                        return isInTheInspectedModule;
+                    }
+
+                    public String toString() {
+                        return keyName;
+                    }
+                };
+                return new Parser(target) {
+                    @Override
+                    public void visitEnd() {
+                        try {
+                            restrictions.put(keyName, build(factory));
+                        } catch (ClassNotFoundException e) {
+                            failure(e);
+                        } catch (InstantiationException e) {
+                            failure(e);
+                        } catch (IllegalAccessException e) {
+                            failure(e);
+                        }
+                    }
+
+                    /**
+                     * Fails to load a {@link AccessRestriction} instance.
+                     */
+                    private void failure(Exception e) {
+                        errorListener.onError(e, null, "Failed to load restrictions");
+                    }
+                };
+            }
+            return null;
+        }
+    }
+
+    private class AnnotatedClassVisitor extends RestrictionsClassVisitor {
+        private String className;
+
+        public AnnotatedClassVisitor(boolean isInTheInspectedModule) {
+            super(isInTheInspectedModule);
+        }
+
+        @Override
+        public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+            this.className = name;
+        }
+
+        @Override
+        public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+            return onAnnotationFor(className, desc);
+        }
+
+        @Override
+        public FieldVisitor visitField(int access, final String name, String desc, String signature, Object value) {
+            return new FieldVisitor(Opcodes.ASM5) {
+                @Override
+                public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+                    return onAnnotationFor(className + '.' + name, desc);
+                }
+            };
+        }
+
+        @Override
+        public MethodVisitor visitMethod(int access, final String methodName, final String methodDesc, String signature, String[] exceptions) {
+            return new MethodVisitor(Opcodes.ASM5) {
+                @Override
+                public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+                    return onAnnotationFor(className + '.' + methodName + methodDesc, desc);
+                }
+            };
+        }
+
+    }
+
+    private class AnnotatedPackageVisitor extends RestrictionsClassVisitor {
+
+        private final String className;
+
+        public AnnotatedPackageVisitor(String className, boolean isInTheInspectedModule) {
+            super(isInTheInspectedModule);
+            this.className = className;
+        }
+
+        @Override
+        public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+            System.out.println("onAnnotationFor " + className + " : " + desc);
+            return onAnnotationFor(className, desc);
+        }
+
     }
 }

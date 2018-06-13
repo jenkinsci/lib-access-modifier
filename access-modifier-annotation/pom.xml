@@ -14,7 +14,7 @@
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>annotation-indexer</artifactId>
-      <version>1.4</version>
+      <version>1.13-SNAPSHOT</version> <!-- https://github.com/jenkinsci/lib-annotation-indexer/pull/5 -->
     </dependency>
     <dependency>
       <groupId>org.ow2.asm</groupId>
