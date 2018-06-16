@@ -139,21 +139,22 @@ public class Checker {
         String className;
         while ((className=r.readLine())!=null) {
 
-
-            try (InputStream is = dependencies.getResourceAsStream(className.replace('.','/') + ".class")) {
-                if (is != null) {
-                    final ClassVisitor visitor = new AnnotatedClassVisitor(isInTheInspectedModule);
-                    new ClassReader(is).accept(visitor, ClassReader.SKIP_CODE);
-                } else {
-                    try (InputStream i = dependencies.getResourceAsStream(className.replace('.','/') + "/package-info.class")) {
-                        if (i==null) {
-                            errorListener.onWarning(null, null, "Failed to find class file for " + className);
-                            continue;
-                        }
-                        final ClassVisitor visitor = new AnnotatedPackageVisitor(className, isInTheInspectedModule);
-                        new ClassReader(i).accept(visitor, ClassReader.SKIP_CODE);
-                    }
+            final ClassVisitor visitor;
+            final String fileName;
+            if (className.endsWith(".*")) {
+                final String packageName = className.substring(0, className.length() - 2);
+                fileName = packageName.replace('.','/') + "/package-info.class";
+                visitor = new AnnotatedPackageVisitor(packageName, isInTheInspectedModule);
+            } else {
+                fileName = className.replace('.','/') + ".class";
+                visitor = new AnnotatedClassVisitor(isInTheInspectedModule);
+            }
+            try (InputStream is = dependencies.getResourceAsStream(fileName)) {
+                if (is == null) {
+                    errorListener.onWarning(null, null, "Failed to find class file " + fileName);
+                    continue;
                 }
+                new ClassReader(is).accept(visitor, ClassReader.SKIP_CODE);
             }
         }
     }
