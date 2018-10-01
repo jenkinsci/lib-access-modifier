@@ -38,7 +38,7 @@ import org.kohsuke.accmod.restrictions.None;
  * <p>
  * Single execution of the enforcement check would create at most one instance
  * of a given {@link AccessRestriction} type, so instance fields can be used to store
- * heavy-weight objects or other indicies that you might need for implementing
+ * heavy-weight objects or other indices that you might need for implementing
  * access control checks. 
  *
  * @author Kohsuke Kawaguchi
