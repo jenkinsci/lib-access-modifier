@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2010, Kohsuke Kawaguchi
+ * Copyright (c) 2018, Steve Arch
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,28 +29,22 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import org.jvnet.hudson.annotation_indexer.Indexed;
 import org.kohsuke.accmod.AccessRestriction;
+import org.kohsuke.accmod.Restricted;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Indicates that a particular element is really deprecated and that the access to it
- * is subject to the additional restrictions.
+ * Indicates that certain classes annotated with {@link Restricted} annotations should be skipped during the
+ * access-modifier-check.
  *
- * <p>
- * These annotations and restrictions introduced by them are enforced by the
- * "access-modifier-checker" mojo. 
- *
- * @author Kohsuke Kawaguchi
+ * @author Steve Arch
  */
 @Retention(RUNTIME)
 @Documented
-//@Indexed
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.TYPE})
 public @interface DisableRestriction {
     /**
-     * Kind of access that are restricted.
-     * If multiple values are specified, those restrictions are OR-ed &mdash; thus if an use
-     * violates any of the restrictions, it'll be considered as an error.
+     * The classes that are marked as {@link Restricted} that should be skipped from the scan.
      */
     Class<?>[] value();
 }
