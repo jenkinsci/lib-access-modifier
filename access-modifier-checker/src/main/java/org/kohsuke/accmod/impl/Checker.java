@@ -228,122 +228,7 @@ public class Checker {
         FileInputStream in = new FileInputStream(clazz);
         try {
             ClassReader cr = new ClassReader(in);
-            cr.accept(new ClassVisitor(Opcodes.ASM5) {
-                private String className;
-                private String methodName,methodDesc;
-                private int line;
-
-                @Override
-                public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-                    this.className = name;
-
-                    if (isSynthetic(access)) {
-                        return;
-                    }
-
-                    if (superName != null) {
-                        for (Restrictions r : getRestrictions(superName)) {
-                            r.usedAsSuperType(currentLocation, errorListener);
-                        }
-                    }
-
-                    if (interfaces != null) {
-                        for (String intf : interfaces) {
-                            for (Restrictions r : getRestrictions(intf)) {
-                                r.usedAsInterface(currentLocation, errorListener);
-                            }
-                        }
-                    }
-                }
-
-                @Override
-                public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-                    this.methodName  = name;
-                    this.methodDesc = desc;
-
-                    if (isSynthetic(access)) {
-                        return null;
-                    }
-
-                    return new MethodVisitor(Opcodes.ASM5) {
-                        @Override
-                        public void visitLineNumber(int _line, Label start) {
-                            line = _line;
-                        }
-
-                        public void visitTypeInsn(int opcode, String type) {
-                            switch (opcode) {
-                            case Opcodes.NEW:
-                                for (Restrictions r : getRestrictions(type)) {
-                                    r.instantiated(currentLocation, errorListener);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-                            for (Restrictions r : getRestrictions(owner + '.' + name + desc)) {
-                                r.invoked(currentLocation, errorListener);
-                            }
-                        }
-
-                        @Override
-                        public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-                            Iterable<Restrictions> rs = getRestrictions(owner + '.' + name);
-                            switch (opcode) {
-                            case Opcodes.GETSTATIC:
-                            case Opcodes.GETFIELD:
-                                for (Restrictions r : rs) {
-                                    r.read(currentLocation, errorListener);
-                                }
-                                break;
-                            case Opcodes.PUTSTATIC:
-                            case Opcodes.PUTFIELD:
-                                for (Restrictions r : rs) {
-                                    r.written(currentLocation, errorListener);
-                                }
-                                break;
-                            }
-                            super.visitFieldInsn(opcode, owner, name, desc);
-                        }
-                    };
-                }
-
-
-                /**
-                 * Constant that represents the current location.
-                 */
-                private final Location currentLocation = new Location() {
-                    public String getClassName() {
-                        return className.replace('/','.');
-                    }
-
-                    public String getMethodName() {
-                        return methodName;
-                    }
-
-                    public String getMethodDescriptor() {
-                        return methodDesc;
-                    }
-
-                    public int getLineNumber() {
-                        return line;
-                    }
-
-                    public String toString() {
-                        return className+':'+line;
-                    }
-
-                    public ClassLoader getDependencyClassLoader() {
-                        return dependencies;
-                    }
-
-                    @Override
-                    public String getProperty(String key) {
-                        return properties.getProperty(key);
-                    }
-                };
-            }, SKIP_FRAMES);
+            cr.accept(new MyClassVisitor(), SKIP_FRAMES);
         } finally {
             in.close();
         }
@@ -386,5 +271,136 @@ public class Checker {
 
     private static boolean isSynthetic(int access) {
         return (access & Opcodes.ACC_SYNTHETIC) != 0;
+    }
+
+    private class MyClassVisitor extends ClassVisitor {
+        private String className;
+        private String methodName, methodDesc;
+        private int line;
+
+        public MyClassVisitor() {
+            super(Opcodes.ASM5);
+        }
+
+        @Override
+        public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+            this.className = name;
+
+            if (isSynthetic(access)) {
+                return;
+            }
+
+            if (superName != null) {
+                for (Restrictions r : getRestrictions(superName)) {
+                    r.usedAsSuperType(currentLocation, errorListener);
+                }
+            }
+
+            if (interfaces != null) {
+                for (String intf : interfaces) {
+                    for (Restrictions r : getRestrictions(intf)) {
+                        r.usedAsInterface(currentLocation, errorListener);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+            this.methodName  = name;
+            this.methodDesc = desc;
+
+            if (isSynthetic(access)) {
+                return null;
+            }
+
+            return new MyMethodVisitor(currentLocation);
+        }
+
+
+        /**
+         * Constant that represents the current location.
+         */
+        private final Location currentLocation = new Location() {
+            public String getClassName() {
+                return className.replace('/','.');
+            }
+
+            public String getMethodName() {
+                return methodName;
+            }
+
+            public String getMethodDescriptor() {
+                return methodDesc;
+            }
+
+            public int getLineNumber() {
+                return line;
+            }
+
+            public String toString() {
+                return className+':'+line;
+            }
+
+            public ClassLoader getDependencyClassLoader() {
+                return dependencies;
+            }
+
+            @Override
+            public String getProperty(String key) {
+                return properties.getProperty(key);
+            }
+        };
+    }
+
+    private class MyMethodVisitor extends MethodVisitor {
+
+        private Location currentLocation;
+
+        public MyMethodVisitor(Location currentLocation) {
+            super(Opcodes.ASM5);
+            this.currentLocation = currentLocation;
+        }
+
+//        @Override
+//        public void visitLineNumber(int _line, Label start) {
+            // line = _line;  FIXME
+//        }
+
+        public void visitTypeInsn(int opcode, String type) {
+            switch (opcode) {
+            case Opcodes.NEW:
+                for (Restrictions r : getRestrictions(type)) {
+                    r.instantiated(currentLocation, errorListener);
+                }
+            }
+        }
+
+        @Override
+        public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+            for (Restrictions r : getRestrictions(owner + '.' + name + desc)) {
+                r.invoked(currentLocation, errorListener);
+            }
+        }
+
+        @Override
+        public void visitFieldInsn(int opcode, String owner, String name, String desc) {
+            Iterable<Restrictions> rs = getRestrictions(owner + '.' + name);
+            switch (opcode) {
+            case Opcodes.GETSTATIC:
+            case Opcodes.GETFIELD:
+                for (Restrictions r : rs) {
+                    r.read(currentLocation, errorListener);
+                }
+                break;
+            case Opcodes.PUTSTATIC:
+            case Opcodes.PUTFIELD:
+                for (Restrictions r : rs) {
+                    r.written(currentLocation, errorListener);
+                }
+                break;
+            }
+            super.visitFieldInsn(opcode, owner, name, desc);
+        }
     }
 }
