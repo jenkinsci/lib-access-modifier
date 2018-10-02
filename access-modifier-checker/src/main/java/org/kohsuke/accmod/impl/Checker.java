@@ -23,6 +23,9 @@
  */
 package org.kohsuke.accmod.impl;
 
+import java.util.HashSet;
+import java.util.Set;
+import org.apache.maven.plugin.logging.Log;
 import org.kohsuke.accmod.AccessRestriction;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.impl.Restrictions.Parser;
@@ -85,12 +88,17 @@ public class Checker {
 
     private final AccessRestrictionFactory factory;
 
+    private final Log log;
 
-    Checker(ClassLoader dependencies, ErrorListener errorListener, Properties properties) throws IOException {
+    private int line;
+
+    Checker(ClassLoader dependencies, ErrorListener errorListener, Properties properties,
+            Log log) throws IOException {
         this.dependencies = dependencies;
         this.errorListener = errorListener;
         this.properties = properties;
         this.factory = new AccessRestrictionFactory(dependencies);
+        this.log = log;
 
         // load access restrictions
         loadAccessRestrictions();
@@ -228,7 +236,7 @@ public class Checker {
         FileInputStream in = new FileInputStream(clazz);
         try {
             ClassReader cr = new ClassReader(in);
-            cr.accept(new MyClassVisitor(), SKIP_FRAMES);
+            cr.accept(new RestrictedClassVisitor(), SKIP_FRAMES);
         } finally {
             in.close();
         }
@@ -273,12 +281,18 @@ public class Checker {
         return (access & Opcodes.ACC_SYNTHETIC) != 0;
     }
 
-    private class MyClassVisitor extends ClassVisitor {
+    private class RestrictedClassVisitor extends ClassVisitor {
         private String className;
         private String methodName, methodDesc;
-        private int line;
+        private String superName;
+        private String[] interfaces;
+        private RestrictedAnnotationVisitor annotationVisitor = new RestrictedAnnotationVisitor();
 
-        public MyClassVisitor() {
+        boolean isSkippedType(Type type) {
+            return annotationVisitor.getSkippedTypes().contains(type);
+        }
+
+        public RestrictedClassVisitor() {
             super(Opcodes.ASM5);
         }
 
@@ -290,16 +304,24 @@ public class Checker {
                 return;
             }
 
-            if (superName != null) {
+            this.superName = superName;
+            this.interfaces = interfaces;
+        }
+
+        @Override
+        public void visitEnd() {
+            // We need to do this in visitEnd so that we have parsed the annotations _before_ doing these checks
+            if (superName != null && !isSkippedType(Type.getObjectType(superName))) {
                 for (Restrictions r : getRestrictions(superName)) {
                     r.usedAsSuperType(currentLocation, errorListener);
                 }
             }
-
             if (interfaces != null) {
                 for (String intf : interfaces) {
-                    for (Restrictions r : getRestrictions(intf)) {
-                        r.usedAsInterface(currentLocation, errorListener);
+                    if(!isSkippedType((Type.getObjectType(intf)))) {
+                        for (Restrictions r : getRestrictions(intf)) {
+                            r.usedAsInterface(currentLocation, errorListener);
+                        }
                     }
                 }
             }
@@ -314,9 +336,13 @@ public class Checker {
                 return null;
             }
 
-            return new MyMethodVisitor(currentLocation);
+            return new RestrictedMethodVisitor(currentLocation, annotationVisitor.getSkippedTypes());
         }
 
+        @Override
+        public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+            return annotationVisitor;
+        }
 
         /**
          * Constant that represents the current location.
@@ -353,54 +379,107 @@ public class Checker {
         };
     }
 
-    private class MyMethodVisitor extends MethodVisitor {
+    private class RestrictedMethodVisitor extends MethodVisitor {
 
+        private final Set<Type> skippedTypesFromParent;
         private Location currentLocation;
+        private RestrictedAnnotationVisitor annotationVisitor = new RestrictedAnnotationVisitor();
 
-        public MyMethodVisitor(Location currentLocation) {
-            super(Opcodes.ASM5);
-            this.currentLocation = currentLocation;
+        private boolean isSkippedType(Type t) {
+            Set<Type> allSkippedTypes = new HashSet<>(skippedTypesFromParent);
+            allSkippedTypes.addAll(annotationVisitor.getSkippedTypes());
+            return allSkippedTypes.contains(t);
         }
 
-//        @Override
-//        public void visitLineNumber(int _line, Label start) {
-            // line = _line;  FIXME
-//        }
+        public RestrictedMethodVisitor(Location currentLocation, Set<Type> skippedTypes) {
+            super(Opcodes.ASM5);
+            log.debug(String.format("New method visitor at %s#%s",
+                    currentLocation.getClassName(), currentLocation.getMethodName()));
+            this.currentLocation = currentLocation;
+            this.skippedTypesFromParent = skippedTypes;
+        }
+
+        @Override
+        public void visitLineNumber(int _line, Label start) {
+            line = _line;
+        }
 
         public void visitTypeInsn(int opcode, String type) {
             switch (opcode) {
             case Opcodes.NEW:
-                for (Restrictions r : getRestrictions(type)) {
-                    r.instantiated(currentLocation, errorListener);
+                if (!isSkippedType(Type.getObjectType(type))) {
+                    for (Restrictions r : getRestrictions(type)) {
+                        r.instantiated(currentLocation, errorListener);
+                    }
                 }
             }
         }
 
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-            for (Restrictions r : getRestrictions(owner + '.' + name + desc)) {
-                r.invoked(currentLocation, errorListener);
+            log.debug(String.format("Visiting method %s#%s", owner, name));
+            if (!isSkippedType(Type.getObjectType(owner))) {
+                for (Restrictions r : getRestrictions(owner + '.' + name + desc)) {
+                    r.invoked(currentLocation, errorListener);
+                }
             }
         }
 
         @Override
         public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-            Iterable<Restrictions> rs = getRestrictions(owner + '.' + name);
-            switch (opcode) {
-            case Opcodes.GETSTATIC:
-            case Opcodes.GETFIELD:
-                for (Restrictions r : rs) {
-                    r.read(currentLocation, errorListener);
+            log.debug(String.format("Visiting field '%s %s' in type %s", desc, name, owner));
+
+            if(!isSkippedType(Type.getObjectType(owner))) {
+                Iterable<Restrictions> rs = getRestrictions(owner + '.' + name);
+                switch (opcode) {
+                    case Opcodes.GETSTATIC:
+                    case Opcodes.GETFIELD:
+                        for (Restrictions r : rs) {
+                            r.read(currentLocation, errorListener);
+                        }
+                        break;
+                    case Opcodes.PUTSTATIC:
+                    case Opcodes.PUTFIELD:
+                        for (Restrictions r : rs) {
+                            r.written(currentLocation, errorListener);
+                        }
+                        break;
                 }
-                break;
-            case Opcodes.PUTSTATIC:
-            case Opcodes.PUTFIELD:
-                for (Restrictions r : rs) {
-                    r.written(currentLocation, errorListener);
-                }
-                break;
+                super.visitFieldInsn(opcode, owner, name, desc);
             }
-            super.visitFieldInsn(opcode, owner, name, desc);
+        }
+
+        @Override
+        public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+            return annotationVisitor;
+        }
+    }
+
+    private class RestrictedAnnotationVisitor extends AnnotationVisitor {
+
+        private Set<Type> skippedRestrictedClasses = new HashSet<>();
+
+        public RestrictedAnnotationVisitor() {
+            super(Opcodes.ASM5);
+        }
+
+        public Set<Type> getSkippedTypes() {
+            return skippedRestrictedClasses;
+        }
+
+        @Override
+        public AnnotationVisitor visitArray(String name) {
+            return new AnnotationVisitor(Opcodes.ASM5) {
+
+                @Override
+                public void visit(String name, Object value) {
+                    Type type = (Type) value;
+                    log.debug(String.format("Skipping @%s class: %s",
+                            Restricted.class.getSimpleName(), type.getClassName()));
+                    skippedRestrictedClasses.add(type);
+                    super.visit(name, value);
+                }
+            };
         }
     }
 }

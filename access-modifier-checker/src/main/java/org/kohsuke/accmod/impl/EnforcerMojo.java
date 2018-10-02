@@ -84,7 +84,7 @@ public class EnforcerMojo extends AbstractMojo {
                     public void onWarning(Throwable t, Location loc, String msg) {
                         getLog().warn(loc+" "+msg,t);
                     }
-                }, properties != null ? properties : new Properties());
+                }, properties != null ? properties : new Properties(), getLog());
 
             {// if there's restriction list in the inspected module itself, load it as well
                 InputStream self = null;
