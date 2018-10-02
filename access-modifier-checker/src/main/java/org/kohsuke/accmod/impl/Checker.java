@@ -242,11 +242,11 @@ public class Checker {
         }
     }
 
-    private Iterable<Restrictions> getRestrictions(String keyName) {
+    private Iterable<Restrictions> getRestrictions(String keyName, Set<Type> skippedTypes) {
         List<Restrictions> rs = new ArrayList<>();
         Restrictions r = restrictions.get(keyName);
-        if (r != null) {
-            rs.add(r);
+        if (r != null && skippedTypes.isEmpty()) {
+            rs.add(r); // Don't get it from the cache if we have types that we want to skip
         }
         int idx = Integer.MAX_VALUE;
         while (true) {
@@ -259,6 +259,10 @@ public class Checker {
             }
             idx = newIdx;
             keyName = keyName.substring(0, idx);
+            if(skippedTypes.contains(Type.getObjectType(keyName))) {
+                // We have hit a type that should be skipped - do not add it to the restrictions
+                break;
+            }
             r = restrictions.get(keyName);
             if (r != null) {
                 Collection<AccessRestriction> applicable = new ArrayList<>();
@@ -288,8 +292,8 @@ public class Checker {
         private String[] interfaces;
         private RestrictedAnnotationVisitor annotationVisitor = new RestrictedAnnotationVisitor();
 
-        boolean isSkippedType(Type type) {
-            return annotationVisitor.getSkippedTypes().contains(type);
+        private Set<Type> getSkippedTypes() {
+            return annotationVisitor.getSkippedTypes();
         }
 
         public RestrictedClassVisitor() {
@@ -311,17 +315,15 @@ public class Checker {
         @Override
         public void visitEnd() {
             // We need to do this in visitEnd so that we have parsed the annotations _before_ doing these checks
-            if (superName != null && !isSkippedType(Type.getObjectType(superName))) {
-                for (Restrictions r : getRestrictions(superName)) {
+            if (superName != null) {
+                for (Restrictions r : getRestrictions(superName, getSkippedTypes())) {
                     r.usedAsSuperType(currentLocation, errorListener);
                 }
             }
             if (interfaces != null) {
                 for (String intf : interfaces) {
-                    if(!isSkippedType((Type.getObjectType(intf)))) {
-                        for (Restrictions r : getRestrictions(intf)) {
-                            r.usedAsInterface(currentLocation, errorListener);
-                        }
+                    for (Restrictions r : getRestrictions(intf, getSkippedTypes())) {
+                        r.usedAsInterface(currentLocation, errorListener);
                     }
                 }
             }
@@ -385,10 +387,10 @@ public class Checker {
         private Location currentLocation;
         private RestrictedAnnotationVisitor annotationVisitor = new RestrictedAnnotationVisitor();
 
-        private boolean isSkippedType(Type t) {
+        private Set<Type> getSkippedTypes() {
             Set<Type> allSkippedTypes = new HashSet<>(skippedTypesFromParent);
             allSkippedTypes.addAll(annotationVisitor.getSkippedTypes());
-            return allSkippedTypes.contains(t);
+            return allSkippedTypes;
         }
 
         public RestrictedMethodVisitor(Location currentLocation, Set<Type> skippedTypes) {
@@ -407,10 +409,8 @@ public class Checker {
         public void visitTypeInsn(int opcode, String type) {
             switch (opcode) {
             case Opcodes.NEW:
-                if (!isSkippedType(Type.getObjectType(type))) {
-                    for (Restrictions r : getRestrictions(type)) {
-                        r.instantiated(currentLocation, errorListener);
-                    }
+                for (Restrictions r : getRestrictions(type, getSkippedTypes())) {
+                    r.instantiated(currentLocation, errorListener);
                 }
             }
         }
@@ -418,10 +418,8 @@ public class Checker {
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
             log.debug(String.format("Visiting method %s#%s", owner, name));
-            if (!isSkippedType(Type.getObjectType(owner))) {
-                for (Restrictions r : getRestrictions(owner + '.' + name + desc)) {
-                    r.invoked(currentLocation, errorListener);
-                }
+            for (Restrictions r : getRestrictions(owner + '.' + name + desc, getSkippedTypes())) {
+                r.invoked(currentLocation, errorListener);
             }
         }
 
@@ -429,24 +427,22 @@ public class Checker {
         public void visitFieldInsn(int opcode, String owner, String name, String desc) {
             log.debug(String.format("Visiting field '%s %s' in type %s", desc, name, owner));
 
-            if(!isSkippedType(Type.getObjectType(owner))) {
-                Iterable<Restrictions> rs = getRestrictions(owner + '.' + name);
-                switch (opcode) {
-                    case Opcodes.GETSTATIC:
-                    case Opcodes.GETFIELD:
-                        for (Restrictions r : rs) {
-                            r.read(currentLocation, errorListener);
-                        }
-                        break;
-                    case Opcodes.PUTSTATIC:
-                    case Opcodes.PUTFIELD:
-                        for (Restrictions r : rs) {
-                            r.written(currentLocation, errorListener);
-                        }
-                        break;
-                }
-                super.visitFieldInsn(opcode, owner, name, desc);
+            Iterable<Restrictions> rs = getRestrictions(owner + '.' + name, getSkippedTypes());
+            switch (opcode) {
+                case Opcodes.GETSTATIC:
+                case Opcodes.GETFIELD:
+                    for (Restrictions r : rs) {
+                        r.read(currentLocation, errorListener);
+                    }
+                    break;
+                case Opcodes.PUTSTATIC:
+                case Opcodes.PUTFIELD:
+                    for (Restrictions r : rs) {
+                        r.written(currentLocation, errorListener);
+                    }
+                    break;
             }
+            super.visitFieldInsn(opcode, owner, name, desc);
         }
 
         @Override
@@ -473,7 +469,7 @@ public class Checker {
 
                 @Override
                 public void visit(String name, Object value) {
-                    Type type = (Type) value;
+                    Type type = value instanceof Type ? (Type) value : Type.getType(value.getClass());
                     log.debug(String.format("Skipping @%s class: %s",
                             Restricted.class.getSimpleName(), type.getClassName()));
                     skippedRestrictedClasses.add(type);
