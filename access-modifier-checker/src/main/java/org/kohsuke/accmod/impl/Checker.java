@@ -29,6 +29,7 @@ import org.apache.maven.plugin.logging.Log;
 import org.kohsuke.accmod.AccessRestriction;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.impl.Restrictions.Parser;
+import org.kohsuke.accmod.restrictions.disable.DisableRestriction;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -343,8 +344,9 @@ public class Checker {
 
         @Override
         public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-            return annotationVisitor;
-        }
+            return Type.getType(DisableRestriction.class).equals(Type.getType(desc))
+                    ? annotationVisitor
+                    : super.visitAnnotation(desc, visible);        }
 
         /**
          * Constant that represents the current location.
@@ -447,7 +449,9 @@ public class Checker {
 
         @Override
         public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-            return annotationVisitor;
+            return Type.getType(DisableRestriction.class).equals(Type.getType(desc))
+                    ? annotationVisitor
+                    : super.visitAnnotation(desc, visible);
         }
     }
 
