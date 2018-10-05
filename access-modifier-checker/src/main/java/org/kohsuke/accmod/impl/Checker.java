@@ -23,9 +23,13 @@
  */
 package org.kohsuke.accmod.impl;
 
+import java.util.HashSet;
+import java.util.Set;
+import org.apache.maven.plugin.logging.Log;
 import org.kohsuke.accmod.AccessRestriction;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.impl.Restrictions.Parser;
+import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -85,12 +89,17 @@ public class Checker {
 
     private final AccessRestrictionFactory factory;
 
+    private final Log log;
 
-    Checker(ClassLoader dependencies, ErrorListener errorListener, Properties properties) throws IOException {
+    private int line;
+
+    Checker(ClassLoader dependencies, ErrorListener errorListener, Properties properties,
+            Log log) throws IOException {
         this.dependencies = dependencies;
         this.errorListener = errorListener;
         this.properties = properties;
         this.factory = new AccessRestrictionFactory(dependencies);
+        this.log = log;
 
         // load access restrictions
         loadAccessRestrictions();
@@ -228,132 +237,17 @@ public class Checker {
         FileInputStream in = new FileInputStream(clazz);
         try {
             ClassReader cr = new ClassReader(in);
-            cr.accept(new ClassVisitor(Opcodes.ASM5) {
-                private String className;
-                private String methodName,methodDesc;
-                private int line;
-
-                @Override
-                public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-                    this.className = name;
-
-                    if (isSynthetic(access)) {
-                        return;
-                    }
-
-                    if (superName != null) {
-                        for (Restrictions r : getRestrictions(superName)) {
-                            r.usedAsSuperType(currentLocation, errorListener);
-                        }
-                    }
-
-                    if (interfaces != null) {
-                        for (String intf : interfaces) {
-                            for (Restrictions r : getRestrictions(intf)) {
-                                r.usedAsInterface(currentLocation, errorListener);
-                            }
-                        }
-                    }
-                }
-
-                @Override
-                public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-                    this.methodName  = name;
-                    this.methodDesc = desc;
-
-                    if (isSynthetic(access)) {
-                        return null;
-                    }
-
-                    return new MethodVisitor(Opcodes.ASM5) {
-                        @Override
-                        public void visitLineNumber(int _line, Label start) {
-                            line = _line;
-                        }
-
-                        public void visitTypeInsn(int opcode, String type) {
-                            switch (opcode) {
-                            case Opcodes.NEW:
-                                for (Restrictions r : getRestrictions(type)) {
-                                    r.instantiated(currentLocation, errorListener);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-                            for (Restrictions r : getRestrictions(owner + '.' + name + desc)) {
-                                r.invoked(currentLocation, errorListener);
-                            }
-                        }
-
-                        @Override
-                        public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-                            Iterable<Restrictions> rs = getRestrictions(owner + '.' + name);
-                            switch (opcode) {
-                            case Opcodes.GETSTATIC:
-                            case Opcodes.GETFIELD:
-                                for (Restrictions r : rs) {
-                                    r.read(currentLocation, errorListener);
-                                }
-                                break;
-                            case Opcodes.PUTSTATIC:
-                            case Opcodes.PUTFIELD:
-                                for (Restrictions r : rs) {
-                                    r.written(currentLocation, errorListener);
-                                }
-                                break;
-                            }
-                            super.visitFieldInsn(opcode, owner, name, desc);
-                        }
-                    };
-                }
-
-
-                /**
-                 * Constant that represents the current location.
-                 */
-                private final Location currentLocation = new Location() {
-                    public String getClassName() {
-                        return className.replace('/','.');
-                    }
-
-                    public String getMethodName() {
-                        return methodName;
-                    }
-
-                    public String getMethodDescriptor() {
-                        return methodDesc;
-                    }
-
-                    public int getLineNumber() {
-                        return line;
-                    }
-
-                    public String toString() {
-                        return className+':'+line;
-                    }
-
-                    public ClassLoader getDependencyClassLoader() {
-                        return dependencies;
-                    }
-
-                    @Override
-                    public String getProperty(String key) {
-                        return properties.getProperty(key);
-                    }
-                };
-            }, SKIP_FRAMES);
+            cr.accept(new RestrictedClassVisitor(), SKIP_FRAMES);
         } finally {
             in.close();
         }
     }
 
-    private Iterable<Restrictions> getRestrictions(String keyName) {
+    private Iterable<Restrictions> getRestrictions(String keyName, Set<Type> skippedTypes) {
         List<Restrictions> rs = new ArrayList<>();
         Restrictions r = restrictions.get(keyName);
-        if (r != null) {
-            rs.add(r);
+        if (r != null && skippedTypes.isEmpty()) {
+            rs.add(r); // Don't get it from the cache if we have types that we want to skip
         }
         int idx = Integer.MAX_VALUE;
         while (true) {
@@ -366,6 +260,10 @@ public class Checker {
             }
             idx = newIdx;
             keyName = keyName.substring(0, idx);
+            if(skippedTypes.contains(Type.getObjectType(keyName))) {
+                // We have hit a type that should be skipped - do not add it to the restrictions
+                break;
+            }
             r = restrictions.get(keyName);
             if (r != null) {
                 Collection<AccessRestriction> applicable = new ArrayList<>();
@@ -386,5 +284,202 @@ public class Checker {
 
     private static boolean isSynthetic(int access) {
         return (access & Opcodes.ACC_SYNTHETIC) != 0;
+    }
+
+    private class RestrictedClassVisitor extends ClassVisitor {
+        private String className;
+        private String methodName, methodDesc;
+        private String superName;
+        private String[] interfaces;
+        private RestrictedAnnotationVisitor annotationVisitor = new RestrictedAnnotationVisitor();
+
+        private Set<Type> getSkippedTypes() {
+            return annotationVisitor.getSkippedTypes();
+        }
+
+        public RestrictedClassVisitor() {
+            super(Opcodes.ASM5);
+        }
+
+        @Override
+        public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+            this.className = name;
+
+            if (isSynthetic(access)) {
+                return;
+            }
+
+            this.superName = superName;
+            this.interfaces = interfaces;
+        }
+
+        @Override
+        public void visitEnd() {
+            // We need to do this in visitEnd so that we have parsed the annotations _before_ doing these checks
+            if (superName != null) {
+                for (Restrictions r : getRestrictions(superName, getSkippedTypes())) {
+                    r.usedAsSuperType(currentLocation, errorListener);
+                }
+            }
+            if (interfaces != null) {
+                for (String intf : interfaces) {
+                    for (Restrictions r : getRestrictions(intf, getSkippedTypes())) {
+                        r.usedAsInterface(currentLocation, errorListener);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+            this.methodName  = name;
+            this.methodDesc = desc;
+
+            if (isSynthetic(access)) {
+                return null;
+            }
+
+            return new RestrictedMethodVisitor(currentLocation, annotationVisitor.getSkippedTypes());
+        }
+
+        @Override
+        public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+            return Type.getType(SuppressRestrictedWarnings.class).equals(Type.getType(desc))
+                    ? annotationVisitor
+                    : super.visitAnnotation(desc, visible);        }
+
+        /**
+         * Constant that represents the current location.
+         */
+        private final Location currentLocation = new Location() {
+            public String getClassName() {
+                return className.replace('/','.');
+            }
+
+            public String getMethodName() {
+                return methodName;
+            }
+
+            public String getMethodDescriptor() {
+                return methodDesc;
+            }
+
+            public int getLineNumber() {
+                return line;
+            }
+
+            public String toString() {
+                return className+':'+line;
+            }
+
+            public ClassLoader getDependencyClassLoader() {
+                return dependencies;
+            }
+
+            @Override
+            public String getProperty(String key) {
+                return properties.getProperty(key);
+            }
+        };
+    }
+
+    private class RestrictedMethodVisitor extends MethodVisitor {
+
+        private final Set<Type> skippedTypesFromParent;
+        private Location currentLocation;
+        private RestrictedAnnotationVisitor annotationVisitor = new RestrictedAnnotationVisitor();
+
+        private Set<Type> getSkippedTypes() {
+            Set<Type> allSkippedTypes = new HashSet<>(skippedTypesFromParent);
+            allSkippedTypes.addAll(annotationVisitor.getSkippedTypes());
+            return allSkippedTypes;
+        }
+
+        public RestrictedMethodVisitor(Location currentLocation, Set<Type> skippedTypes) {
+            super(Opcodes.ASM5);
+            log.debug(String.format("New method visitor at %s#%s",
+                    currentLocation.getClassName(), currentLocation.getMethodName()));
+            this.currentLocation = currentLocation;
+            this.skippedTypesFromParent = skippedTypes;
+        }
+
+        @Override
+        public void visitLineNumber(int _line, Label start) {
+            line = _line;
+        }
+
+        public void visitTypeInsn(int opcode, String type) {
+            switch (opcode) {
+            case Opcodes.NEW:
+                for (Restrictions r : getRestrictions(type, getSkippedTypes())) {
+                    r.instantiated(currentLocation, errorListener);
+                }
+            }
+        }
+
+        @Override
+        public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+            log.debug(String.format("Visiting method %s#%s", owner, name));
+            for (Restrictions r : getRestrictions(owner + '.' + name + desc, getSkippedTypes())) {
+                r.invoked(currentLocation, errorListener);
+            }
+        }
+
+        @Override
+        public void visitFieldInsn(int opcode, String owner, String name, String desc) {
+            log.debug(String.format("Visiting field '%s %s' in type %s", desc, name, owner));
+
+            Iterable<Restrictions> rs = getRestrictions(owner + '.' + name, getSkippedTypes());
+            switch (opcode) {
+                case Opcodes.GETSTATIC:
+                case Opcodes.GETFIELD:
+                    for (Restrictions r : rs) {
+                        r.read(currentLocation, errorListener);
+                    }
+                    break;
+                case Opcodes.PUTSTATIC:
+                case Opcodes.PUTFIELD:
+                    for (Restrictions r : rs) {
+                        r.written(currentLocation, errorListener);
+                    }
+                    break;
+            }
+            super.visitFieldInsn(opcode, owner, name, desc);
+        }
+
+        @Override
+        public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+            return Type.getType(SuppressRestrictedWarnings.class).equals(Type.getType(desc))
+                    ? annotationVisitor
+                    : super.visitAnnotation(desc, visible);
+        }
+    }
+
+    private class RestrictedAnnotationVisitor extends AnnotationVisitor {
+
+        private Set<Type> skippedRestrictedClasses = new HashSet<>();
+
+        public RestrictedAnnotationVisitor() {
+            super(Opcodes.ASM5);
+        }
+
+        public Set<Type> getSkippedTypes() {
+            return skippedRestrictedClasses;
+        }
+
+        @Override
+        public AnnotationVisitor visitArray(String name) {
+            return new AnnotationVisitor(Opcodes.ASM5) {
+
+                @Override
+                public void visit(String name, Object value) {
+                    Type type = value instanceof Type ? (Type) value : Type.getType(value.getClass());
+                    log.debug(String.format("Skipping @%s class: %s",
+                            Restricted.class.getSimpleName(), type.getClassName()));
+                    skippedRestrictedClasses.add(type);
+                    super.visit(name, value);
+                }
+            };
+        }
     }
 }

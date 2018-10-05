@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>access-modifier</artifactId>
+    <groupId>org.kohsuke</groupId>
+    <version>1.16-SNAPSHOT</version>
+  </parent>
+  <artifactId>access-modifier-suppressions</artifactId>
+
+  <name>Suppression for Access Modifier annotations</name>
+  <description>This module allows you to enable suppressions for turning off warnings about Restricted APIs.
+    !!!WARNING!!!
+    Classes are marked as @Restricted for a reason and this module should not be used lightly! It implies that the
+    author does not intend for them to be used outside their defined scope and as such they may be
+    changed/modified/removed at any stage without warning. A simple upgrade of the dependency may break your module. Use
+    at your own risk.
+    You should try to not use @Restricted classes in the first place, but if you _must_ use them, this is a less-brutal
+    approach than just disabling the access-modifier-checker entirely
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.kohsuke</groupId>
+      <artifactId>access-modifier-annotation</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+</project>
