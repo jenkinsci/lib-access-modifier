@@ -2,9 +2,9 @@ package caller;
 
 import api.ApiWithRestrictedMethodAndField;
 import api.RestrictedApi;
-import org.kohsuke.accmod.restrictions.disable.DisableRestriction;
+import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
 
-@DisableRestriction( {ApiWithRestrictedMethodAndField.class, RestrictedApi.class})
+@SuppressRestrictedWarnings( {ApiWithRestrictedMethodAndField.class, RestrictedApi.class})
 public class CallerDisabledAtClassLevel extends RestrictedApi {
 
     private RestrictedApi restrictedApi;

@@ -21,28 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.kohsuke.accmod.restrictions.disable;
+package org.kohsuke.accmod.restrictions.suppressions;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import org.jvnet.hudson.annotation_indexer.Indexed;
-import org.kohsuke.accmod.AccessRestriction;
 import org.kohsuke.accmod.Restricted;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Indicates that certain classes annotated with {@link Restricted} annotations should be skipped during the
- * access-modifier-check.
+ * <p>Indicates that certain classes annotated with {@link Restricted} annotations should be skipped during the
+ * access-modifier-check.</p>
+ *
+ * <p><b>Warning!</b> Classes are markes as {@link Restricted} for a reason! Do not use these suppressions lightly.
+ * Use at your own risk</p>
  *
  * @author Steve Arch
  */
 @Retention(RUNTIME)
 @Documented
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.TYPE})
-public @interface DisableRestriction {
+public @interface SuppressRestrictedWarnings {
     /**
      * The classes that are marked as {@link Restricted} that should be skipped from the scan.
      */

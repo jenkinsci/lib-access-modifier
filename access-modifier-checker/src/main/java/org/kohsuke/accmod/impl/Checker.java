@@ -29,7 +29,7 @@ import org.apache.maven.plugin.logging.Log;
 import org.kohsuke.accmod.AccessRestriction;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.impl.Restrictions.Parser;
-import org.kohsuke.accmod.restrictions.disable.DisableRestriction;
+import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -344,7 +344,7 @@ public class Checker {
 
         @Override
         public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-            return Type.getType(DisableRestriction.class).equals(Type.getType(desc))
+            return Type.getType(SuppressRestrictedWarnings.class).equals(Type.getType(desc))
                     ? annotationVisitor
                     : super.visitAnnotation(desc, visible);        }
 
@@ -449,7 +449,7 @@ public class Checker {
 
         @Override
         public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-            return Type.getType(DisableRestriction.class).equals(Type.getType(desc))
+            return Type.getType(SuppressRestrictedWarnings.class).equals(Type.getType(desc))
                     ? annotationVisitor
                     : super.visitAnnotation(desc, visible);
         }

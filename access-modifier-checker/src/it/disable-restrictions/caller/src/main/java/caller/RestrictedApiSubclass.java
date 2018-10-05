@@ -1,8 +1,8 @@
 package caller;
 
 import api.RestrictedApi;
-import org.kohsuke.accmod.restrictions.disable.DisableRestriction;
+import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
 
-@DisableRestriction(RestrictedApi.class)
+@SuppressRestrictedWarnings(RestrictedApi.class)
 public class RestrictedApiSubclass extends RestrictedApi {
 }

@@ -13,6 +13,11 @@
             <artifactId>api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>access-modifier-suppressions</artifactId>
+            <version>@project.version@</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

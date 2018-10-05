@@ -18,6 +18,7 @@
   <modules>
     <module>access-modifier-annotation</module>
     <module>access-modifier-checker</module>
+    <module>access-modifier-suppressions</module>
   </modules>
 
   <distributionManagement>

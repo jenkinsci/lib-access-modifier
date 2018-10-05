@@ -1,8 +1,8 @@
 package caller;
 
 import api.RestrictedInterface;
-import org.kohsuke.accmod.restrictions.disable.DisableRestriction;
+import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
 
-@DisableRestriction(RestrictedInterface.class)
+@SuppressRestrictedWarnings(RestrictedInterface.class)
 public class RestrictedInterfaceImplementation implements RestrictedInterface {
 }
