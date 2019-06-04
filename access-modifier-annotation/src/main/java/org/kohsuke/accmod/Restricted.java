@@ -50,4 +50,10 @@ public @interface Restricted {
      * violates any of the restrictions, it'll be considered as an error.
      */
     Class<? extends AccessRestriction>[] value();
+
+    /**
+     * A message providing the reason for the restriction and guidance as to how to evolve code that
+     * violates the restriction.
+     */
+    String message() default "";
 }

@@ -76,6 +76,11 @@ public abstract class AccessRestriction {
     public abstract void invoked(Location loc, RestrictedElement target, ErrorListener errorListener);
 
     /**
+     * The method on which this restriction is placed is overridden elsewhere.
+     */
+    public abstract void overridden(Location loc, RestrictedElement target, ErrorListener errorListener);
+
+    /**
      * The field on which this restriction is placed is read.
      */
     public abstract void read(Location loc, RestrictedElement target, ErrorListener errorListener);

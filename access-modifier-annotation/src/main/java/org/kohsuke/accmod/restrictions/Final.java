@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2018 CloudBees, Inc.
+ * Copyright 2017 CloudBees, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,26 +24,31 @@
 
 package org.kohsuke.accmod.restrictions;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Inherited;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.impl.ErrorListener;
 import org.kohsuke.accmod.impl.Location;
 import org.kohsuke.accmod.impl.RestrictedElement;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Opcodes;
 
 /**
- * References are only allowed within the same module, as in {@link NoExternalUse},
- * or when a special flag is set in the consuming module.
- * This is the property {@code useBeta} with the value {@code true}.
+ * A method which may not be overridden from anywhere.
+ * Akin to using applying the {@code final} modifier but allowing legacy implementations to override.
+ * Note that {@link Restricted} is not {@link Inherited} so this only protects attempted accesses via the defining type;
+ * However, legacy overrides must be migrated to a non-final method when upgraded to a baseline with this restriction
+ * so it shouldn't matter.
+ * @since FIXME
  */
-public class Beta extends DoNotUse {
+public class Final extends None {
 
     @Override
-    public void error(Location loc, RestrictedElement target, ErrorListener errorListener) {
-        if (target.isInTheInspectedModule()) {
-            return;
-        }
-        if ("true".equals(loc.getProperty("useBeta"))) {
-            return;
-        }
-        errorListener.onError(null, loc, target + " is still in beta. " + target.message());
+    public void overridden(Location loc, RestrictedElement target, ErrorListener errorListener) {
+        errorListener.onError(null, loc, target + " must not be overridden. " + target.message());
     }
-
 }

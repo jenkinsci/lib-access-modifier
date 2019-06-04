@@ -23,6 +23,8 @@
  */
 package org.kohsuke.accmod.impl;
 
+import java.util.Objects;
+import org.codehaus.plexus.util.StringUtils;
 import org.kohsuke.accmod.AccessRestriction;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Opcodes;
@@ -67,6 +69,11 @@ public class Restrictions extends ArrayList<AccessRestriction> {
             ar.invoked(location,target,errorListener);
     }
 
+    public void overridden(Location location, ErrorListener errorListener) {
+        for (AccessRestriction ar : this)
+            ar.overridden(location,target,errorListener);
+    }
+
     public void read(Location location, ErrorListener errorListener) {
         for (AccessRestriction ar : this)
             ar.read(location,target,errorListener);
@@ -79,32 +86,62 @@ public class Restrictions extends ArrayList<AccessRestriction> {
 
     abstract static class Parser extends AnnotationVisitor {
         private List<Type> restrictions = new ArrayList<Type>();
-        private final RestrictedElement target;
+        private final String keyName;
+        private final boolean isInTheInspectedModule;
+        private String message;
+        private RestrictedElement target;
 
-        protected Parser(RestrictedElement target) {
+        protected Parser(String keyName, boolean isInTheInspectedModule) {
             super(Opcodes.ASM5);
-            this.target = target;
+            this.keyName = keyName;
+            this.isInTheInspectedModule = isInTheInspectedModule;
+        }
+
+        private RestrictedElement target() {
+            if (target == null) {
+                target = new RestrictedElement() {
+                    public boolean isInTheInspectedModule() {
+                        return isInTheInspectedModule;
+                    }
+
+                    public String toString() {
+                        return keyName;
+                    }
+
+                    @Override
+                    public String message() {
+                        return StringUtils.defaultString(message, "");
+                    }
+                };
+            }
+            return target;
         }
 
         public void visit(String name, Object value) {
-            restrictions.add((Type)value);
+            if ("message".equals(name)) {
+                message = value instanceof String ? (String)value : String.valueOf(value);
+            } else {
+                restrictions.add((Type) value);
+            }
         }
 
         public void visitEnum(String name, String desc, String value) {
         }
 
         public AnnotationVisitor visitAnnotation(String name, String desc) {
+            // this parser assumes it is invoked on @Restricted which doesn't have any child annotation values
             return this;
         }
 
         public AnnotationVisitor visitArray(String name) {
+            // this parser assumes it is invoked on @Restricted which doesn't have any array values
             return this;
         }
 
         public abstract void visitEnd();
 
         public Restrictions build(AccessRestrictionFactory f) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-            Restrictions r = new Restrictions(target);
+            Restrictions r = new Restrictions(target());
             for (Type t : restrictions) {
                 r.add(f.get(t));
             }

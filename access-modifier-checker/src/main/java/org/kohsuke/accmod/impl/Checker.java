@@ -192,14 +192,7 @@ public class Checker {
                      */
                     private AnnotationVisitor onAnnotationFor(final String keyName, String desc) {
                         if (RESTRICTED_DESCRIPTOR.equals(desc)) {
-                            RestrictedElement target = new RestrictedElement() {
-                                public boolean isInTheInspectedModule() {
-                                    return isInTheInspectedModule;
-                                }
-
-                                public String toString() { return keyName; }
-                            };
-                            return new Parser(target) {
+                            return new Parser(keyName, isInTheInspectedModule) {
                                 @Override
                                 public void visitEnd() {
                                     try {
@@ -339,7 +332,8 @@ public class Checker {
                 return null;
             }
 
-            return new RestrictedMethodVisitor(currentLocation, annotationVisitor.getSkippedTypes());
+            return new RestrictedMethodVisitor(currentLocation, annotationVisitor.getSkippedTypes(), methodName,
+                    methodDesc, superName, interfaces);
         }
 
         @Override
@@ -386,8 +380,12 @@ public class Checker {
     private class RestrictedMethodVisitor extends MethodVisitor {
 
         private final Set<Type> skippedTypesFromParent;
+        private final String methodName, methodDesc;
+        private final String superName;
+        private final String[] interfaces;
         private Location currentLocation;
         private RestrictedAnnotationVisitor annotationVisitor = new RestrictedAnnotationVisitor();
+        private int firstLine = Integer.MAX_VALUE;
 
         private Set<Type> getSkippedTypes() {
             Set<Type> allSkippedTypes = new HashSet<>(skippedTypesFromParent);
@@ -395,16 +393,22 @@ public class Checker {
             return allSkippedTypes;
         }
 
-        public RestrictedMethodVisitor(Location currentLocation, Set<Type> skippedTypes) {
+        public RestrictedMethodVisitor(Location currentLocation, Set<Type> skippedTypes, String methodName,
+                                       String methodDesc, String superName, String[] interfaces) {
             super(Opcodes.ASM5);
             log.debug(String.format("New method visitor at %s#%s",
                     currentLocation.getClassName(), currentLocation.getMethodName()));
             this.currentLocation = currentLocation;
             this.skippedTypesFromParent = skippedTypes;
+            this.methodName = methodName;
+            this.methodDesc = methodDesc;
+            this.superName = superName;
+            this.interfaces = interfaces;
         }
 
         @Override
         public void visitLineNumber(int _line, Label start) {
+            firstLine = Math.min(_line, firstLine);
             line = _line;
         }
 
@@ -452,6 +456,35 @@ public class Checker {
             return Type.getType(SuppressRestrictedWarnings.class).equals(Type.getType(desc))
                     ? annotationVisitor
                     : super.visitAnnotation(desc, visible);
+        }
+
+        @Override
+        public void visitEnd() {
+            // the order ASM calls visitors means that we only get the line numbers after the start of the method
+            // thus we hack the line tracking to ensure that the reported line number corresponds to the first line
+            // of code. If the method implementation is the empty body, this may be the last line of the body!
+            int oldLine = line;
+            if (firstLine < line) {
+                line = firstLine;
+            }
+            try {
+                if (superName != null) {
+                    for (Restrictions r : getRestrictions(superName + '.' + methodName + methodDesc,
+                            getSkippedTypes())) {
+                        r.overridden(currentLocation, errorListener);
+                    }
+                }
+                if (interfaces != null) {
+                    for (String intf : interfaces) {
+                        for (Restrictions r : getRestrictions(intf + '.' + methodName + methodDesc,
+                                getSkippedTypes())) {
+                            r.overridden(currentLocation, errorListener);
+                        }
+                    }
+                }
+            } finally {
+                line = oldLine;
+            }
         }
     }
 

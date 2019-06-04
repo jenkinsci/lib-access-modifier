@@ -54,12 +54,16 @@ public class DoNotUse extends AccessRestriction {
         error(loc,target,errorListener);
     }
 
+    public void overridden(Location loc, RestrictedElement target, ErrorListener errorListener) {
+        error(loc,target,errorListener);
+    }
+
     public void read(Location loc, RestrictedElement target, ErrorListener errorListener) {
         error(loc,target,errorListener);
     }
 
     public void error(Location loc, RestrictedElement target, ErrorListener errorListener) {
-        errorListener.onError(null,loc,target+" must not be used");
+        errorListener.onError(null,loc,target+" must not be used. " + target.message());
     }
 
     @Override

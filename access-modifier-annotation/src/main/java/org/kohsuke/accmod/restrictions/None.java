@@ -23,6 +23,9 @@ public class None extends AccessRestriction {
     public void invoked(Location loc, RestrictedElement target, ErrorListener errorListener) {
     }
 
+    public void overridden(Location loc, RestrictedElement target, ErrorListener errorListener) {
+    }
+
     public void read(Location loc, RestrictedElement target, ErrorListener errorListener) {
     }
 

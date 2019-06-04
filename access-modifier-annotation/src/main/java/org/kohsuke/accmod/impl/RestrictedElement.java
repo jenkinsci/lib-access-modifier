@@ -39,4 +39,9 @@ public interface RestrictedElement {
     boolean isInTheInspectedModule();
 
     String toString();
+
+    /**
+     * If non-empty then this additional message should be provided when reporting an error.
+     */
+    String message();
 }

@@ -75,7 +75,7 @@ public class ProtectedExternally extends None {
             errorListener.onError(x, loc, "cannot inspect caller");
             return;
         }
-        errorListener.onError(null, loc, target + " must not be called except as if protected");
+        errorListener.onError(null, loc, target + " must not be called except as if protected. " + target.message());
     }
 
 }
