@@ -59,7 +59,7 @@ public class ProtectedExternally extends None {
             ClassReader cr = new ClassReader(is);
             final AtomicBoolean ok = new AtomicBoolean();
             final String supe = target.toString().replaceFirst("[.].+$", "");
-            cr.accept(new ClassVisitor(Opcodes.ASM5) {
+            cr.accept(new ClassVisitor(Opcodes.ASM9) {
                 @Override
                 public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
                     // TODO traverse supertype hierarchy recursively

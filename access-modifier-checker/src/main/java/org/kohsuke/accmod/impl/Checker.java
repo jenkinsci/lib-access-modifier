@@ -154,7 +154,7 @@ public class Checker {
             }
 
             try {
-                new ClassReader(is).accept(new ClassVisitor(Opcodes.ASM5) {
+                new ClassReader(is).accept(new ClassVisitor(Opcodes.ASM9) {
                     private String className;
 
                     @Override
@@ -169,7 +169,7 @@ public class Checker {
 
                     @Override
                     public FieldVisitor visitField(int access, final String name, String desc, String signature, Object value) {
-                        return new FieldVisitor(Opcodes.ASM5) {
+                        return new FieldVisitor(Opcodes.ASM9) {
                             @Override
                             public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
                                 return onAnnotationFor(className+'.'+name,desc);
@@ -179,7 +179,7 @@ public class Checker {
 
                     @Override
                     public MethodVisitor visitMethod(int access, final String methodName, final String methodDesc, String signature, String[] exceptions) {
-                        return new MethodVisitor(Opcodes.ASM5) {
+                        return new MethodVisitor(Opcodes.ASM9) {
                             @Override
                             public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
                                 return onAnnotationFor(className+'.'+methodName+methodDesc,desc);
@@ -298,7 +298,7 @@ public class Checker {
         }
 
         public RestrictedClassVisitor() {
-            super(Opcodes.ASM5);
+            super(Opcodes.ASM9);
         }
 
         @Override
@@ -396,7 +396,7 @@ public class Checker {
         }
 
         public RestrictedMethodVisitor(Location currentLocation, Set<Type> skippedTypes) {
-            super(Opcodes.ASM5);
+            super(Opcodes.ASM9);
             log.debug(String.format("New method visitor at %s#%s",
                     currentLocation.getClassName(), currentLocation.getMethodName()));
             this.currentLocation = currentLocation;
@@ -460,7 +460,7 @@ public class Checker {
         private Set<Type> skippedRestrictedClasses = new HashSet<>();
 
         public RestrictedAnnotationVisitor() {
-            super(Opcodes.ASM5);
+            super(Opcodes.ASM9);
         }
 
         public Set<Type> getSkippedTypes() {
@@ -469,7 +469,7 @@ public class Checker {
 
         @Override
         public AnnotationVisitor visitArray(String name) {
-            return new AnnotationVisitor(Opcodes.ASM5) {
+            return new AnnotationVisitor(Opcodes.ASM9) {
 
                 @Override
                 public void visit(String name, Object value) {
