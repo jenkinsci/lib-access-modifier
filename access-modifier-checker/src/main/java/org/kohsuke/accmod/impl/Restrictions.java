@@ -82,7 +82,7 @@ public class Restrictions extends ArrayList<AccessRestriction> {
         private final RestrictedElement target;
 
         protected Parser(RestrictedElement target) {
-            super(Opcodes.ASM5);
+            super(Opcodes.ASM9);
             this.target = target;
         }
 

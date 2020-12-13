@@ -29,7 +29,7 @@
     </dependency>
     <dependency>
       <groupId>org.ow2.asm</groupId>
-      <artifactId>asm-debug-all</artifactId>
+      <artifactId>asm</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -81,7 +81,7 @@
           </plugin>
           <plugin>
             <artifactId>maven-invoker-plugin</artifactId>
-            <version>2.0.0</version>
+            <version>3.2.1</version>
             <executions>
               <execution>
                 <id>integration-test</id>
