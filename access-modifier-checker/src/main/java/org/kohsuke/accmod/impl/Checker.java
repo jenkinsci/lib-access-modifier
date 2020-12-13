@@ -93,7 +93,7 @@ public class Checker {
 
     private int line;
 
-    Checker(ClassLoader dependencies, ErrorListener errorListener, Properties properties,
+    public Checker(ClassLoader dependencies, ErrorListener errorListener, Properties properties,
             Log log) throws IOException {
         this.dependencies = dependencies;
         this.errorListener = errorListener;
