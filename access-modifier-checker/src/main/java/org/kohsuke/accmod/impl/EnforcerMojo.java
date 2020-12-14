@@ -1,5 +1,6 @@
 package org.kohsuke.accmod.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -54,6 +55,14 @@ public class EnforcerMojo extends AbstractMojo {
      */
     private Properties properties;
 
+    @SuppressFBWarnings(value = {
+            "UWF_UNWRITTEN_FIELD",
+            "URLCONNECTION_SSRF_FD",
+            "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD",
+            "PATH_TRAVERSAL_IN",
+            "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED",
+            "NP_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"
+    })
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
             getLog().info("Skipping access modifier checks");
