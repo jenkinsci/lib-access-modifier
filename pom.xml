@@ -10,13 +10,16 @@
 
   <groupId>org.kohsuke</groupId>
   <artifactId>access-modifier</artifactId>
-  <version>1.17-SNAPSHOT</version>
+  <version>${revision}${changelist}</version>
 
   <name>Custom access modifier for Java</name>
   <packaging>pom</packaging>
   <description>Extensible application-specific access modifiers for Java</description>
 
   <properties>
+    <revision>1.17</revision>
+    <changelist>-SNAPSHOT</changelist>
+    <gitHubRepo>jenkinsci/lib-access-modifier</gitHubRepo>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.level>8</java.level>
     <spotbugs.excludeFilterFile>${project.basedir}/../src/spotbugs/excludesFilter.xml</spotbugs.excludeFilterFile>
@@ -36,10 +39,10 @@
   </distributionManagement>
 
   <scm>
-    <connection>scm:git:git@github.com/jenkins/lib-${project.artifactId}.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/lib-${project.artifactId}.git</developerConnection>
-    <url>https://${project.artifactId}.kohsuke.org/</url>
-    <tag>HEAD</tag>
+    <connection>scm:git:git@github.com/${gitHubRepo}.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/${gitHubRepo}.git</developerConnection>
+    <url>https://github.com/${gitHubRepo}</url>
+    <tag>${scmTag}</tag>
   </scm>
 
   <developers>
