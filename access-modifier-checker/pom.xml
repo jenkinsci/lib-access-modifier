@@ -108,6 +108,7 @@
                   <filterProperties>
                     <repository.proxy.url>${repository.proxy.url}</repository.proxy.url>
                   </filterProperties>
+                  <writeJunitReport>true</writeJunitReport>
                 </configuration>
               </execution>
             </executions>
