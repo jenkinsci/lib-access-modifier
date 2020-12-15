@@ -29,6 +29,8 @@ import java.io.InputStream;
 import java.lang.annotation.Inherited;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.impl.ErrorListener;
 import org.kohsuke.accmod.impl.Location;
@@ -47,6 +49,9 @@ import org.objectweb.asm.Opcodes;
 public class ProtectedExternally extends None {
 
     @Override
+    @SuppressFBWarnings(
+            value={"RCN_REDUNDANT_NULLCHECK_OF_NULL_VALUE","RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", "NP_LOAD_OF_KNOWN_NULL_VALUE"},
+            justification="something in this class confuses spotbugs, I can't see anything redundant and the error line is the catch block")
     public void invoked(Location loc, RestrictedElement target, ErrorListener errorListener) {
         if (target.isInTheInspectedModule()) {
             return;
@@ -59,7 +64,7 @@ public class ProtectedExternally extends None {
             ClassReader cr = new ClassReader(is);
             final AtomicBoolean ok = new AtomicBoolean();
             final String supe = target.toString().replaceFirst("[.].+$", "");
-            cr.accept(new ClassVisitor(Opcodes.ASM5) {
+            cr.accept(new ClassVisitor(Opcodes.ASM9) {
                 @Override
                 public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
                     // TODO traverse supertype hierarchy recursively

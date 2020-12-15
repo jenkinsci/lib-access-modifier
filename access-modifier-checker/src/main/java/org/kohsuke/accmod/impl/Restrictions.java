@@ -31,6 +31,7 @@ import org.objectweb.asm.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -77,12 +78,26 @@ public class Restrictions extends ArrayList<AccessRestriction> {
             ar.written(location,target,errorListener);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Restrictions that = (Restrictions) o;
+        return Objects.equals(target, that.target);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), target);
+    }
+
     abstract static class Parser extends AnnotationVisitor {
         private List<Type> restrictions = new ArrayList<Type>();
         private final RestrictedElement target;
 
         protected Parser(RestrictedElement target) {
-            super(Opcodes.ASM5);
+            super(Opcodes.ASM9);
             this.target = target;
         }
 

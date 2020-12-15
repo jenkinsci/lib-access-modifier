@@ -1,0 +1,7 @@
+<FindBugsFilter>
+    <Match>
+        <!-- generated class -->
+        <Class name="org.kohsuke.accmod.impl.HelpMojo"/>
+        <Bug pattern="XXE_DOCUMENT"/>
+    </Match>
+</FindBugsFilter>

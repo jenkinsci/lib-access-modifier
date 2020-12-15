@@ -93,7 +93,7 @@ public class Checker {
 
     private int line;
 
-    Checker(ClassLoader dependencies, ErrorListener errorListener, Properties properties,
+    public Checker(ClassLoader dependencies, ErrorListener errorListener, Properties properties,
             Log log) throws IOException {
         this.dependencies = dependencies;
         this.errorListener = errorListener;
@@ -114,8 +114,13 @@ public class Checker {
      */
     public void check(File f) throws IOException {
         if (f.isDirectory()) {
-            for (File c : f.listFiles())
+            File[] files = f.listFiles();
+            if (files == null) {
+                throw new IllegalArgumentException("Directory " + f.getName() + " is empty when it should not be");
+            }
+            for (File c : files) {
                 check(c);
+            }
             return;
         }
 
@@ -154,7 +159,7 @@ public class Checker {
             }
 
             try {
-                new ClassReader(is).accept(new ClassVisitor(Opcodes.ASM5) {
+                new ClassReader(is).accept(new ClassVisitor(Opcodes.ASM9) {
                     private String className;
 
                     @Override
@@ -169,7 +174,7 @@ public class Checker {
 
                     @Override
                     public FieldVisitor visitField(int access, final String name, String desc, String signature, Object value) {
-                        return new FieldVisitor(Opcodes.ASM5) {
+                        return new FieldVisitor(Opcodes.ASM9) {
                             @Override
                             public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
                                 return onAnnotationFor(className+'.'+name,desc);
@@ -179,7 +184,7 @@ public class Checker {
 
                     @Override
                     public MethodVisitor visitMethod(int access, final String methodName, final String methodDesc, String signature, String[] exceptions) {
-                        return new MethodVisitor(Opcodes.ASM5) {
+                        return new MethodVisitor(Opcodes.ASM9) {
                             @Override
                             public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
                                 return onAnnotationFor(className+'.'+methodName+methodDesc,desc);
@@ -298,7 +303,7 @@ public class Checker {
         }
 
         public RestrictedClassVisitor() {
-            super(Opcodes.ASM5);
+            super(Opcodes.ASM9);
         }
 
         @Override
@@ -339,7 +344,7 @@ public class Checker {
                 return null;
             }
 
-            return new RestrictedMethodVisitor(currentLocation, annotationVisitor.getSkippedTypes());
+            return new RestrictedMethodVisitor(currentLocation, className, annotationVisitor.getSkippedTypes());
         }
 
         @Override
@@ -383,11 +388,24 @@ public class Checker {
         };
     }
 
+    private static String topLevelClass(String a) {
+      int i = a.indexOf('$');
+      if (i == -1) {
+          return a;
+      }
+      return a.substring(0, i);
+    }
+
+    private static boolean sameClassFile(String currentClass, String owner) {
+        return topLevelClass(currentClass).equals(topLevelClass(owner));
+    }
+
     private class RestrictedMethodVisitor extends MethodVisitor {
 
         private final Set<Type> skippedTypesFromParent;
         private Location currentLocation;
         private RestrictedAnnotationVisitor annotationVisitor = new RestrictedAnnotationVisitor();
+        private final String currentClass;
 
         private Set<Type> getSkippedTypes() {
             Set<Type> allSkippedTypes = new HashSet<>(skippedTypesFromParent);
@@ -395,12 +413,13 @@ public class Checker {
             return allSkippedTypes;
         }
 
-        public RestrictedMethodVisitor(Location currentLocation, Set<Type> skippedTypes) {
-            super(Opcodes.ASM5);
+        public RestrictedMethodVisitor(Location currentLocation, String currentClass, Set<Type> skippedTypes) {
+            super(Opcodes.ASM9);
             log.debug(String.format("New method visitor at %s#%s",
                     currentLocation.getClassName(), currentLocation.getMethodName()));
             this.currentLocation = currentLocation;
             this.skippedTypesFromParent = skippedTypes;
+            this.currentClass = currentClass;
         }
 
         @Override
@@ -411,6 +430,10 @@ public class Checker {
         public void visitTypeInsn(int opcode, String type) {
             switch (opcode) {
             case Opcodes.NEW:
+                if (sameClassFile(currentClass, type)) {
+                    return;
+                }
+
                 for (Restrictions r : getRestrictions(type, getSkippedTypes())) {
                     r.instantiated(currentLocation, errorListener);
                 }
@@ -420,6 +443,11 @@ public class Checker {
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
             log.debug(String.format("Visiting method %s#%s", owner, name));
+
+            if (sameClassFile(currentClass, owner)) {
+                return;
+            }
+
             for (Restrictions r : getRestrictions(owner + '.' + name + desc, getSkippedTypes())) {
                 r.invoked(currentLocation, errorListener);
             }
@@ -428,6 +456,10 @@ public class Checker {
         @Override
         public void visitFieldInsn(int opcode, String owner, String name, String desc) {
             log.debug(String.format("Visiting field '%s %s' in type %s", desc, name, owner));
+
+            if (sameClassFile(currentClass, owner)) {
+                return;
+            }
 
             Iterable<Restrictions> rs = getRestrictions(owner + '.' + name, getSkippedTypes());
             switch (opcode) {
@@ -444,7 +476,6 @@ public class Checker {
                     }
                     break;
             }
-            super.visitFieldInsn(opcode, owner, name, desc);
         }
 
         @Override
@@ -460,7 +491,7 @@ public class Checker {
         private Set<Type> skippedRestrictedClasses = new HashSet<>();
 
         public RestrictedAnnotationVisitor() {
-            super(Opcodes.ASM5);
+            super(Opcodes.ASM9);
         }
 
         public Set<Type> getSkippedTypes() {
@@ -469,7 +500,7 @@ public class Checker {
 
         @Override
         public AnnotationVisitor visitArray(String name) {
-            return new AnnotationVisitor(Opcodes.ASM5) {
+            return new AnnotationVisitor(Opcodes.ASM9) {
 
                 @Override
                 public void visit(String name, Object value) {
