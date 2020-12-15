@@ -1,9 +1,14 @@
 package org.kohsuke.accmod.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.kohsuke.accmod.Restricted;
 
@@ -21,39 +26,41 @@ import java.util.Properties;
  * Enforces the {@link Restricted} access modifier annotations.
  *
  * @author Kohsuke Kawaguchi
- * @goal enforce
- * @phase process-classes
- * @requiresDependencyResolution compile
- * @author Kohsuke Kawaguchi
  */
+@Mojo(name="enforce", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE)
 public class EnforcerMojo extends AbstractMojo {
     /**
      * The maven project.
-     *
-     * @parameter expression="${project}"
-     * @required
-     * @readonly
      */
+    @Parameter(property = "project", readonly = true)
     protected MavenProject project;
 
     /**
      * If true, skip running the checker entirely.
-     * @parameter expression="${access-modifier-checker.skip}" default-value="false"
      */
-    private boolean skip;
+    @Parameter(property = "access-modifier-checker.skip", defaultValue = "false")
+    private boolean skip = false;
 
     /**
      * If false, print warnings about violations but do not fail the build.
-     * @parameter expression="${access-modifier-checker.failOnError}" default-value="true"
      */
+    @Parameter(property = "access-modifier-checker.failOnError", defaultValue = "true")
     private boolean failOnError = true;
 
     /**
      * Optional properties to also make available to restriction checkers.
-     * @parameter
      */
+    @Parameter
     private Properties properties;
 
+    @SuppressFBWarnings(value = {
+            "UWF_UNWRITTEN_FIELD",
+            "URLCONNECTION_SSRF_FD",
+            "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD",
+            "PATH_TRAVERSAL_IN",
+            "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED",
+            "NP_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"
+    })
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
             getLog().info("Skipping access modifier checks");
