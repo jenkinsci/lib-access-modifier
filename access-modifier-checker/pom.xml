@@ -32,20 +32,31 @@
       <artifactId>asm</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-plugin-api</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-project</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-    <dependency>
       <groupId>org.kohsuke.metainf-services</groupId>
       <artifactId>metainf-services</artifactId>
       <version>1.1</version>
       <optional>true</optional>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.maven/maven-plugin-api -->
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>3.6.3</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <!-- needed when injecting the Maven Project into a plugin  -->
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>3.6.3</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven.plugin-tools</groupId>
+      <artifactId>maven-plugin-annotations</artifactId>
+      <version>3.6.0</version>
+      <optional>true</optional> <!-- annotations are not used at runtime because @Retention(value=CLASS), they are needed only to build the plugin -->
     </dependency>
   </dependencies>
 

@@ -2,12 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.kohsuke</groupId>
-    <artifactId>pom</artifactId>
-    <version>21</version>
+    <groupId>org.jenkins-ci</groupId>
+    <artifactId>jenkins</artifactId>
+    <version>1.61</version>
     <relativePath />
   </parent>
 
+  <groupId>org.kohsuke</groupId>
   <artifactId>access-modifier</artifactId>
   <version>1.17-SNAPSHOT</version>
 
@@ -17,6 +18,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.level>8</java.level>
+    <spotbugs.excludeFilterFile>${project.basedir}/../src/spotbugs/excludesFilter.xml</spotbugs.excludeFilterFile>
   </properties>
 
   <modules>
@@ -33,9 +36,9 @@
   </distributionManagement>
 
   <scm>
-    <connection>scm:git:git@github.com/kohsuke/${project.artifactId}.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/kohsuke/${project.artifactId}.git</developerConnection>
-    <url>http://${project.artifactId}.kohsuke.org/</url>
+    <connection>scm:git:git@github.com/jenkins/lib-${project.artifactId}.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/lib-${project.artifactId}.git</developerConnection>
+    <url>https://${project.artifactId}.kohsuke.org/</url>
     <tag>HEAD</tag>
   </scm>
 
@@ -54,12 +57,12 @@
       </plugin>
     </plugins>
   </reporting>
-  
+
   <licenses>
     <license>
       <name>MIT License</name>
       <distribution>repository</distribution>
-      <url>http://www.opensource.org/licenses/mit-license.php</url>
+      <url>https://opensource.org/licenses/MIT</url>
     </license>
   </licenses>
 
@@ -67,39 +70,30 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <doclint>none</doclint>
+          <source>${java.level}</source>
+          <locale>en_US</locale>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
         <version>3.6.0</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <additionalparam>-Xdoclint:none</additionalparam>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-          <reportPlugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-javadoc-plugin</artifactId>
-              <configuration>
-                <additionalparam>-Xdoclint:none</additionalparam>
-              </configuration>
-            </plugin>
-          </reportPlugins>
-        </configuration>
+        <executions>
+          <execution>
+            <id>default-descriptor</id>
+            <phase>process-classes</phase>
+          </execution>
+          <!-- if you want to generate help goal -->
+          <execution>
+            <id>help-goal</id>
+            <goals>
+              <goal>helpmojo</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

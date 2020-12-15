@@ -114,8 +114,13 @@ public class Checker {
      */
     public void check(File f) throws IOException {
         if (f.isDirectory()) {
-            for (File c : f.listFiles())
+            File[] files = f.listFiles();
+            if (files == null) {
+                throw new IllegalArgumentException("Directory " + f.getName() + " is empty when it should not be");
+            }
+            for (File c : files) {
                 check(c);
+            }
             return;
         }
 
