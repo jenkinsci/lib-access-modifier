@@ -51,7 +51,7 @@ public class ProtectedExternally extends None {
     @Override
     @SuppressFBWarnings(
             value={"RCN_REDUNDANT_NULLCHECK_OF_NULL_VALUE","RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", "NP_LOAD_OF_KNOWN_NULL_VALUE"},
-            justification="let me just make the build pass")
+            justification="something in this class confuses spotbugs, I can't see anything redundant and the error line is the catch block")
     public void invoked(Location loc, RestrictedElement target, ErrorListener errorListener) {
         if (target.isInTheInspectedModule()) {
             return;
