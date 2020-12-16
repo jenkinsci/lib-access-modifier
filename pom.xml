@@ -31,13 +31,6 @@
     <module>access-modifier-suppressions</module>
   </modules>
 
-  <distributionManagement>
-    <site>
-      <id>github-pages</id>
-      <url>gitsite:git@github.com/kohsuke/access-modifier.git</url>
-    </site>
-  </distributionManagement>
-
   <scm>
     <connection>scm:git:git@github.com/${gitHubRepo}.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/${gitHubRepo}.git</developerConnection>
