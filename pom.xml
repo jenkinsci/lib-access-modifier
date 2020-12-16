@@ -10,14 +10,14 @@
 
   <groupId>org.kohsuke</groupId>
   <artifactId>access-modifier</artifactId>
-  <version>1.17</version>
+  <version>${revision}${changelist}</version>
 
   <name>Custom access modifier for Java</name>
   <packaging>pom</packaging>
   <description>Extensible application-specific access modifiers for Java</description>
 
   <properties>
-    <revision>1.17</revision>
+    <revision>1.18</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/lib-access-modifier</gitHubRepo>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -42,7 +42,7 @@
     <connection>scm:git:git@github.com/${gitHubRepo}.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/${gitHubRepo}.git</developerConnection>
     <url>https://github.com/${gitHubRepo}</url>
-    <tag>access-modifier-1.17</tag>
+    <tag>${scmTag}</tag>
   </scm>
 
   <developers>
