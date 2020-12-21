@@ -15,6 +15,7 @@
   <name>Custom access modifier for Java</name>
   <packaging>pom</packaging>
   <description>Extensible application-specific access modifiers for Java</description>
+  <url>https://github.com/jenkinsci/lib-access-modifier</url>
 
   <properties>
     <revision>1.22</revision>
