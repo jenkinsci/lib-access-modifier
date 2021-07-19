@@ -96,7 +96,7 @@ public class EnforcerMojo extends AbstractMojo {
             {// if there's restriction list in the inspected module itself, load it as well
                 InputStream self = null;
                 try {
-                    self = new URL(outputURL, "META-INF/annotations/" + Restricted.class.getName()).openStream();
+                    self = new URL(outputURL, "META-INF/services/annotations/" + Restricted.class.getName()).openStream();
                 } catch (IOException e) {
                 }
                 if (self!=null)
