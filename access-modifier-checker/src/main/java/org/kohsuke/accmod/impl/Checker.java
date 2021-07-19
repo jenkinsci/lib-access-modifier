@@ -132,7 +132,7 @@ public class Checker {
      * Loads all the access restrictions defined in our dependencies.
      */
     private void loadAccessRestrictions() throws IOException {
-        final Enumeration<URL> res = dependencies.getResources("META-INF/annotations/"+Restricted.class.getName());
+        final Enumeration<URL> res = dependencies.getResources("META-INF/services/annotations/"+Restricted.class.getName());
         while (res.hasMoreElements()) {
             URL url = res.nextElement();
             loadRestrictions(url.openStream(),false);
@@ -140,7 +140,7 @@ public class Checker {
     }
 
     /**
-     * Loads an additional restriction from the specified "META-INF/annotations/org.kohsuke.accmod.Restricted" file.
+     * Loads an additional restriction from the specified "META-INF/services/annotations/org.kohsuke.accmod.Restricted" file.
      *
      * @param isInTheInspectedModule
      *      This value shows up in {@link RestrictedElement#isInTheInspectedModule()}.
