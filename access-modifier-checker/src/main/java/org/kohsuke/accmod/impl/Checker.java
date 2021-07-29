@@ -132,10 +132,12 @@ public class Checker {
      * Loads all the access restrictions defined in our dependencies.
      */
     private void loadAccessRestrictions() throws IOException {
-        final Enumeration<URL> res = dependencies.getResources("META-INF/services/annotations/"+Restricted.class.getName());
-        while (res.hasMoreElements()) {
-            URL url = res.nextElement();
-            loadRestrictions(url.openStream(),false);
+        for (String prefix : new String[] {"META-INF/services/annotations/", "META-INF/annotations/"}) {
+            final Enumeration<URL> res = dependencies.getResources(prefix + Restricted.class.getName());
+            while (res.hasMoreElements()) {
+                URL url = res.nextElement();
+                loadRestrictions(url.openStream(), false);
+            }
         }
     }
 
