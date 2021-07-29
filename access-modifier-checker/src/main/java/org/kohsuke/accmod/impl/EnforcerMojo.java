@@ -14,7 +14,6 @@ import org.kohsuke.accmod.Restricted;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -94,13 +93,10 @@ public class EnforcerMojo extends AbstractMojo {
                 }, properties != null ? properties : new Properties(), getLog());
 
             {// if there's restriction list in the inspected module itself, load it as well
-                InputStream self = null;
                 try {
-                    self = new URL(outputURL, "META-INF/services/annotations/" + Restricted.class.getName()).openStream();
+                    checker.loadRestrictions(new URLClassLoader(new URL[] {outputURL}, ClassLoader.getSystemClassLoader().getParent()), true);
                 } catch (IOException e) {
                 }
-                if (self!=null)
-                    checker.loadRestrictions(self, true);
             }
 
             // perform checks
