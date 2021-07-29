@@ -18,7 +18,7 @@
   <url>https://github.com/jenkinsci/lib-access-modifier</url>
 
   <properties>
-    <revision>1.23</revision>
+    <revision>1.24</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/lib-access-modifier</gitHubRepo>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
