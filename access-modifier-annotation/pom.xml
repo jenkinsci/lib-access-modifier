@@ -4,7 +4,7 @@
   <parent>
     <artifactId>access-modifier</artifactId>
     <groupId>org.kohsuke</groupId>
-    <version>${revision}${changelist}</version>
+    <version>1.24</version>
   </parent>
   <artifactId>access-modifier-annotation</artifactId>
 
