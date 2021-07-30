@@ -10,6 +10,10 @@
   <packaging>maven-plugin</packaging>
   <name>Custom Access Modifier Checker</name>
 
+  <properties>
+    <maven.version>3.8.1</maven.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -40,14 +44,14 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
-      <version>3.6.3</version>
+      <version>${maven.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <!-- needed when injecting the Maven Project into a plugin  -->
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
-      <version>3.6.3</version>
+      <version>${maven.version}</version>
       <scope>provided</scope>
     </dependency>
 
@@ -58,6 +62,16 @@
       <optional>true</optional> <!-- annotations are not used at runtime because @Retention(value=CLASS), they are needed only to build the plugin -->
     </dependency>
   </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency> <!-- Irritatingly, maven-resolver-provider & maven-resolver-impl request different versions -->
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.7.30</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <profiles>
     <profile>

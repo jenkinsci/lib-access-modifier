@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 /**
  * Enforces the {@link Restricted} access modifier annotations.
@@ -73,6 +74,7 @@ public class EnforcerMojo extends AbstractMojo {
                 dependencies.add(a.getFile().toURI().toURL());
             URL outputURL = outputDir.toURI().toURL();
             dependencies.add(outputURL);
+            getLog().debug("inspecting\n" + dependencies.stream().map(URL::toString).collect(Collectors.joining("\n")));
 
             final boolean[] failed = new boolean[1];
             Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[dependencies.size()]), getClass().getClassLoader()),
@@ -92,11 +94,12 @@ public class EnforcerMojo extends AbstractMojo {
                     }
                 }, properties != null ? properties : new Properties(), getLog());
 
-            {// if there's restriction list in the inspected module itself, load it as well
-                try {
-                    checker.loadRestrictions(new URLClassLoader(new URL[] {outputURL}, ClassLoader.getSystemClassLoader().getParent()), true);
-                } catch (IOException e) {
-                }
+            // If there is a restriction list in the inspected module itself, load it as well:
+            try {
+                checker.loadRestrictions(new URLClassLoader(new URL[] {outputURL}, ClassLoader.getSystemClassLoader().getParent()), true);
+                getLog().debug("loaded local index " + outputURL);
+            } catch (IOException e) {
+                getLog().debug("could not load local index " + outputURL, e);
             }
 
             // perform checks
