@@ -26,10 +26,9 @@ package org.kohsuke.accmod.restrictions.suppressions;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.kohsuke.accmod.Restricted;
-
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * <p>Indicates that certain classes annotated with {@link Restricted} annotations should be skipped during the
@@ -40,7 +39,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * @author Steve Arch
  */
-@Retention(RUNTIME)
+@Retention(RetentionPolicy.CLASS)
 @Documented
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.TYPE})
 public @interface SuppressRestrictedWarnings {
