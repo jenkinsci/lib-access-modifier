@@ -78,7 +78,7 @@ public class EnforcerMojo extends AbstractMojo {
             getLog().debug("inspecting\n" + dependencies.stream().map(URL::toString).collect(Collectors.joining("\n")));
 
             final boolean[] failed = new boolean[1];
-            Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[dependencies.size()]), getClass().getClassLoader()),
+            Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[0]), getClass().getClassLoader()),
                 new ErrorListener() {
                     public void onError(Throwable t, Location loc, String msg) {
                         String locMsg = loc+" "+msg;
