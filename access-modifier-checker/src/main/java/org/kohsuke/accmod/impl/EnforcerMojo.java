@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -71,7 +70,7 @@ public class EnforcerMojo extends AbstractMojo {
             File outputDir = new File(project.getBuild().getOutputDirectory());
 
             List<URL> dependencies = new ArrayList<>();
-            for (Artifact a : (Collection<Artifact>)project.getArtifacts())
+            for (Artifact a : project.getArtifacts())
                 dependencies.add(a.getFile().toURI().toURL());
             URL outputURL = outputDir.toURI().toURL();
             dependencies.add(outputURL);
