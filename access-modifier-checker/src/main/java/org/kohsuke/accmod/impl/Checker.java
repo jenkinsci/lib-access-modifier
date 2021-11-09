@@ -25,6 +25,7 @@ package org.kohsuke.accmod.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.maven.plugin.logging.Log;
@@ -87,7 +88,7 @@ public class Checker {
      * <li>internal name of a type + '.' + method name + method descriptor
      * </ul>
      */
-    private final Map<String,Restrictions> restrictions = new HashMap<String,Restrictions>();
+    private final Map<String,Restrictions> restrictions = new HashMap<>();
 
     private final AccessRestrictionFactory factory;
 
@@ -154,7 +155,7 @@ public class Checker {
     public void loadRestrictions(InputStream stream, final boolean isInTheInspectedModule) throws IOException {
         if (stream==null)      return;
 
-        BufferedReader r = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+        BufferedReader r = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
         String className;
         while ((className=r.readLine())!=null) {
             InputStream is = dependencies.getResourceAsStream(className.replace('.','/') + ".class");

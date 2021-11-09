@@ -93,7 +93,7 @@ public class Restrictions extends ArrayList<AccessRestriction> {
     }
 
     abstract static class Parser extends AnnotationVisitor {
-        private List<Type> restrictions = new ArrayList<Type>();
+        private List<Type> restrictions = new ArrayList<>();
         private final RestrictedElement target;
 
         protected Parser(RestrictedElement target) {

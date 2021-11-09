@@ -70,7 +70,7 @@ public class EnforcerMojo extends AbstractMojo {
         try {
             File outputDir = new File(project.getBuild().getOutputDirectory());
 
-            List<URL> dependencies = new ArrayList<URL>();
+            List<URL> dependencies = new ArrayList<>();
             for (Artifact a : (Collection<Artifact>)project.getArtifacts())
                 dependencies.add(a.getFile().toURI().toURL());
             URL outputURL = outputDir.toURI().toURL();
