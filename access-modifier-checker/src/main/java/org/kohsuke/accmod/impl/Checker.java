@@ -25,6 +25,7 @@ package org.kohsuke.accmod.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.maven.plugin.logging.Log;
@@ -87,7 +88,7 @@ public class Checker {
      * <li>internal name of a type + '.' + method name + method descriptor
      * </ul>
      */
-    private final Map<String,Restrictions> restrictions = new HashMap<String,Restrictions>();
+    private final Map<String,Restrictions> restrictions = new HashMap<>();
 
     private final AccessRestrictionFactory factory;
 
@@ -149,12 +150,11 @@ public class Checker {
      *
      * @param isInTheInspectedModule
      *      This value shows up in {@link RestrictedElement#isInTheInspectedModule()}.
-     * @param stream
      */
     public void loadRestrictions(InputStream stream, final boolean isInTheInspectedModule) throws IOException {
         if (stream==null)      return;
 
-        BufferedReader r = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+        BufferedReader r = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
         String className;
         while ((className=r.readLine())!=null) {
             InputStream is = dependencies.getResourceAsStream(className.replace('.','/') + ".class");
@@ -214,11 +214,7 @@ public class Checker {
                                 public void visitEnd() {
                                     try {
                                         restrictions.put(keyName,build(factory));
-                                    } catch (ClassNotFoundException e) {
-                                        failure(e);
-                                    } catch (InstantiationException e) {
-                                        failure(e);
-                                    } catch (IllegalAccessException e) {
+                                    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                                         failure(e);
                                     }
                                 }
@@ -244,12 +240,9 @@ public class Checker {
      * Inspects a class for the restriction violations.
      */
     public void checkClass(File clazz) throws IOException {
-        FileInputStream in = new FileInputStream(clazz);
-        try {
+        try (FileInputStream in = new FileInputStream(clazz)) {
             ClassReader cr = new ClassReader(in);
             cr.accept(new RestrictedClassVisitor(), SKIP_FRAMES);
-        } finally {
-            in.close();
         }
     }
 

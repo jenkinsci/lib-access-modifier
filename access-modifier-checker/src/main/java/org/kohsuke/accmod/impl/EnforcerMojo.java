@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -70,15 +69,15 @@ public class EnforcerMojo extends AbstractMojo {
         try {
             File outputDir = new File(project.getBuild().getOutputDirectory());
 
-            List<URL> dependencies = new ArrayList<URL>();
-            for (Artifact a : (Collection<Artifact>)project.getArtifacts())
+            List<URL> dependencies = new ArrayList<>();
+            for (Artifact a : project.getArtifacts())
                 dependencies.add(a.getFile().toURI().toURL());
             URL outputURL = outputDir.toURI().toURL();
             dependencies.add(outputURL);
             getLog().debug("inspecting\n" + dependencies.stream().map(URL::toString).collect(Collectors.joining("\n")));
 
             final boolean[] failed = new boolean[1];
-            Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[dependencies.size()]), getClass().getClassLoader()),
+            Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[0]), getClass().getClassLoader()),
                 new ErrorListener() {
                     public void onError(Throwable t, Location loc, String msg) {
                         String locMsg = loc+" "+msg;

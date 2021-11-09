@@ -37,7 +37,7 @@ import java.util.Map;
  * @author Kohsuke Kawaguchi
  */
 public class AccessRestrictionFactory {
-    private final Map<String,AccessRestriction> instances = new HashMap<String, AccessRestriction>();
+    private final Map<String,AccessRestriction> instances = new HashMap<>();
     private final ClassLoader cl;
 
     @SuppressFBWarnings("EI_EXPOSE_REP2")
