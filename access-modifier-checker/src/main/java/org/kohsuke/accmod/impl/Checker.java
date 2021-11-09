@@ -241,12 +241,9 @@ public class Checker {
      * Inspects a class for the restriction violations.
      */
     public void checkClass(File clazz) throws IOException {
-        FileInputStream in = new FileInputStream(clazz);
-        try {
+        try (FileInputStream in = new FileInputStream(clazz)) {
             ClassReader cr = new ClassReader(in);
             cr.accept(new RestrictedClassVisitor(), SKIP_FRAMES);
-        } finally {
-            in.close();
         }
     }
 
