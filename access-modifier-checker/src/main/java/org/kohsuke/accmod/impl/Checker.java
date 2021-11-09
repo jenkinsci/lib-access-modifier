@@ -23,6 +23,8 @@
  */
 package org.kohsuke.accmod.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.maven.plugin.logging.Log;
@@ -93,6 +95,7 @@ public class Checker {
 
     private int line;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public Checker(ClassLoader dependencies, ErrorListener errorListener, Properties properties,
             Log log) throws IOException {
         this.dependencies = dependencies;
