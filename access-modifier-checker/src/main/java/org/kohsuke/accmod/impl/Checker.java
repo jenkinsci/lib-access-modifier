@@ -150,7 +150,6 @@ public class Checker {
      *
      * @param isInTheInspectedModule
      *      This value shows up in {@link RestrictedElement#isInTheInspectedModule()}.
-     * @param stream
      */
     public void loadRestrictions(InputStream stream, final boolean isInTheInspectedModule) throws IOException {
         if (stream==null)      return;
