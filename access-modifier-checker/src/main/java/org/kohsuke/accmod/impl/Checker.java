@@ -215,11 +215,7 @@ public class Checker {
                                 public void visitEnd() {
                                     try {
                                         restrictions.put(keyName,build(factory));
-                                    } catch (ClassNotFoundException e) {
-                                        failure(e);
-                                    } catch (InstantiationException e) {
-                                        failure(e);
-                                    } catch (IllegalAccessException e) {
+                                    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                                         failure(e);
                                     }
                                 }
