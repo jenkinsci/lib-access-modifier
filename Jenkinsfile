@@ -1,8 +1,10 @@
-// While this isn't a plugin, it is much simpler to reuse the pipeline code for CI
-// allowing easy windows / linux testing and producing incrementals
-// the only feature that buildPlugin has that relates to plugins is allowing you to test against multiple jenkins versions
-buildPlugin(configurations: [
-        [ platform: 'linux', jdk: '8', jenkins: null ],
-        [ platform: 'linux', jdk: '11', jenkins: null ],
-        [ platform: 'windows', jdk: '11', jenkins: null ]
+/*
+ * While this is not a plugin, it is much simpler to reuse the pipeline code for CI. This allows for
+ * easy Linux/Windows testing and produces incrementals. The only feature that relates to plugins is
+ * allowing one to test against multiple Jenkins versions.
+ */
+buildPlugin(useContainerAgent: true, configurations: [
+  [ platform: 'linux', jdk: '8', jenkins: null ],
+  [ platform: 'linux', jdk: '11', jenkins: null ],
+  [ platform: 'windows', jdk: '11', jenkins: null ]
 ])
