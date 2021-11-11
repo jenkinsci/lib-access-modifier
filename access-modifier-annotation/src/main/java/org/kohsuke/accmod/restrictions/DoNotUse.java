@@ -34,26 +34,32 @@ import org.kohsuke.accmod.impl.RestrictedElement;
  * @author Kohsuke Kawaguchi
  */
 public class DoNotUse extends AccessRestriction {
+    @Override
     public void written(Location loc, RestrictedElement target, ErrorListener errorListener) {
         error(loc,target,errorListener);
     }
 
+    @Override
     public void usedAsSuperType(Location loc, RestrictedElement target, ErrorListener errorListener) {
         error(loc,target,errorListener);
     }
 
+    @Override
     public void usedAsInterface(Location loc, RestrictedElement target, ErrorListener errorListener) {
         error(loc,target,errorListener);
     }
 
+    @Override
     public void instantiated(Location loc, RestrictedElement target, ErrorListener errorListener) {
         error(loc,target,errorListener);
     }
 
+    @Override
     public void invoked(Location loc, RestrictedElement target, ErrorListener errorListener) {
         error(loc,target,errorListener);
     }
 
+    @Override
     public void read(Location loc, RestrictedElement target, ErrorListener errorListener) {
         error(loc,target,errorListener);
     }
