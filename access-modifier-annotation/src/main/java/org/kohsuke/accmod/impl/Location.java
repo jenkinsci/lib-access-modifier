@@ -61,6 +61,7 @@ public interface Location {
      * Obtains a human readable description of the location.
      * Useful for an error message.
      */
+    @Override
     String toString();
 
     /**

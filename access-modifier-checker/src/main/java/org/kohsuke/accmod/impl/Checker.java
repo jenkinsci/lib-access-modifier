@@ -203,10 +203,12 @@ public class Checker {
                     private AnnotationVisitor onAnnotationFor(final String keyName, String desc) {
                         if (RESTRICTED_DESCRIPTOR.equals(desc)) {
                             RestrictedElement target = new RestrictedElement() {
+                                @Override
                                 public boolean isInTheInspectedModule() {
                                     return isInTheInspectedModule;
                                 }
 
+                                @Override
                                 public String toString() { return keyName; }
                             };
                             return new Parser(target) {
@@ -355,26 +357,32 @@ public class Checker {
          * Constant that represents the current location.
          */
         private final Location currentLocation = new Location() {
+            @Override
             public String getClassName() {
                 return className.replace('/','.');
             }
 
+            @Override
             public String getMethodName() {
                 return methodName;
             }
 
+            @Override
             public String getMethodDescriptor() {
                 return methodDesc;
             }
 
+            @Override
             public int getLineNumber() {
                 return line;
             }
 
+            @Override
             public String toString() {
                 return className+':'+line;
             }
 
+            @Override
             public ClassLoader getDependencyClassLoader() {
                 return dependencies;
             }
@@ -425,6 +433,7 @@ public class Checker {
             line = _line;
         }
 
+        @Override
         public void visitTypeInsn(int opcode, String type) {
             switch (opcode) {
             case Opcodes.NEW:

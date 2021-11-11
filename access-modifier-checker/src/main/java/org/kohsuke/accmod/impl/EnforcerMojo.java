@@ -53,6 +53,7 @@ public class EnforcerMojo extends AbstractMojo {
     @Parameter
     private Properties properties;
 
+    @Override
     @SuppressFBWarnings(value = {
             "UWF_UNWRITTEN_FIELD",
             "URLCONNECTION_SSRF_FD",
@@ -79,6 +80,7 @@ public class EnforcerMojo extends AbstractMojo {
             final boolean[] failed = new boolean[1];
             Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[0]), getClass().getClassLoader()),
                 new ErrorListener() {
+                    @Override
                     public void onError(Throwable t, Location loc, String msg) {
                         String locMsg = loc+" "+msg;
                         if (failOnError) {
@@ -89,6 +91,7 @@ public class EnforcerMojo extends AbstractMojo {
                         failed[0] = true;
                     }
 
+                    @Override
                     public void onWarning(Throwable t, Location loc, String msg) {
                         getLog().warn(loc+" "+msg,t);
                     }
