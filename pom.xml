@@ -110,6 +110,20 @@
     </dependencies>
   </dependencyManagement>
 
+  <dependencies>
+    <dependency>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <optional>true</optional>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>jsr305</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+
   <repositories>
     <repository>
       <id>repo.jenkins-ci.org</id>
