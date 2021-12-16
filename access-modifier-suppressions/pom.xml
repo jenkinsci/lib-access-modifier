@@ -4,7 +4,7 @@
   <parent>
     <artifactId>access-modifier</artifactId>
     <groupId>org.kohsuke</groupId>
-    <version>1.27</version>
+    <version>${revision}${changelist}</version>
   </parent>
   <artifactId>access-modifier-suppressions</artifactId>
 
