@@ -1,9 +1,9 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>access-modifier</artifactId>
     <groupId>org.kohsuke</groupId>
+    <artifactId>access-modifier</artifactId>
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>access-modifier-checker</artifactId>
@@ -13,6 +13,17 @@
   <properties>
     <maven.version>3.8.4</maven.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <!-- Irritatingly, maven-resolver-provider & maven-resolver-impl request different versions -->
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.7.32</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -56,31 +67,22 @@
     </dependency>
 
     <dependency>
+      <!-- annotations are not used at runtime because @Retention(value=CLASS), they are needed only to build the plugin -->
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
       <version>3.6.2</version>
-      <optional>true</optional> <!-- annotations are not used at runtime because @Retention(value=CLASS), they are needed only to build the plugin -->
+      <optional>true</optional>
     </dependency>
   </dependencies>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency> <!-- Irritatingly, maven-resolver-provider & maven-resolver-impl request different versions -->
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>1.7.32</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <profiles>
     <profile>
       <id>run-its</id>
       <activation>
-          <property>
-              <name>skipTests</name>
-              <value>!true</value>
-          </property>
+        <property>
+          <name>skipTests</name>
+          <value>!true</value>
+        </property>
       </activation>
       <build>
         <plugins>

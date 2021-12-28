@@ -11,20 +11,26 @@
   <groupId>org.kohsuke</groupId>
   <artifactId>access-modifier</artifactId>
   <version>${revision}${changelist}</version>
+  <packaging>pom</packaging>
 
   <name>Custom access modifier for Java</name>
-  <packaging>pom</packaging>
   <description>Extensible application-specific access modifiers for Java</description>
   <url>https://github.com/jenkinsci/lib-access-modifier</url>
 
-  <properties>
-    <revision>1.28</revision>
-    <changelist>-SNAPSHOT</changelist>
-    <gitHubRepo>jenkinsci/lib-access-modifier</gitHubRepo>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <java.level>8</java.level>
-    <spotbugs.excludeFilterFile>${project.basedir}/../src/spotbugs/excludesFilter.xml</spotbugs.excludeFilterFile>
-  </properties>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+      <distribution>repository</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>kohsuke</id>
+      <name>Kohsuke Kawaguchi</name>
+    </developer>
+  </developers>
 
   <modules>
     <module>access-modifier-annotation</module>
@@ -35,65 +41,18 @@
   <scm>
     <connection>scm:git:git@github.com/${gitHubRepo}.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/${gitHubRepo}.git</developerConnection>
-    <url>https://github.com/${gitHubRepo}</url>
     <tag>${scmTag}</tag>
+    <url>https://github.com/${gitHubRepo}</url>
   </scm>
 
-  <developers>
-    <developer>
-      <id>kohsuke</id>
-      <name>Kohsuke Kawaguchi</name>
-    </developer>
-  </developers>
-
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </reporting>
-
-  <licenses>
-    <license>
-      <name>MIT License</name>
-      <distribution>repository</distribution>
-      <url>https://opensource.org/licenses/MIT</url>
-    </license>
-  </licenses>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <doclint>none</doclint>
-          <source>${java.level}</source>
-          <locale>en_US</locale>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-plugin-plugin</artifactId>
-        <version>3.6.2</version>
-        <executions>
-          <execution>
-            <id>default-descriptor</id>
-            <phase>process-classes</phase>
-          </execution>
-          <!-- if you want to generate help goal -->
-          <execution>
-            <id>help-goal</id>
-            <goals>
-              <goal>helpmojo</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+  <properties>
+    <revision>1.28</revision>
+    <changelist>-SNAPSHOT</changelist>
+    <gitHubRepo>jenkinsci/lib-access-modifier</gitHubRepo>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.level>8</java.level>
+    <spotbugs.excludeFilterFile>${project.basedir}/../src/spotbugs/excludesFilter.xml</spotbugs.excludeFilterFile>
+  </properties>
 
   <dependencyManagement>
     <dependencies>
@@ -137,5 +96,46 @@
       <url>https://repo.jenkins-ci.org/public/</url>
     </pluginRepository>
   </pluginRepositories>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <doclint>none</doclint>
+          <source>${java.level}</source>
+          <locale>en_US</locale>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-plugin-plugin</artifactId>
+        <version>3.6.2</version>
+        <executions>
+          <execution>
+            <id>default-descriptor</id>
+            <phase>process-classes</phase>
+          </execution>
+          <!-- if you want to generate help goal -->
+          <execution>
+            <id>help-goal</id>
+            <goals>
+              <goal>helpmojo</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </reporting>
 
 </project>
