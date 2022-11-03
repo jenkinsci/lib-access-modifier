@@ -49,7 +49,6 @@
     <revision>1.28</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/lib-access-modifier</gitHubRepo>
-    <spotbugs.excludeFilterFile>${project.basedir}/../src/spotbugs/excludesFilter.xml</spotbugs.excludeFilterFile>
   </properties>
 
   <dependencyManagement>

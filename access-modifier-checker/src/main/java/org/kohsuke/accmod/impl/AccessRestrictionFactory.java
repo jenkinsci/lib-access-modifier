@@ -23,8 +23,6 @@
  */
 package org.kohsuke.accmod.impl;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import org.kohsuke.accmod.AccessRestriction;
 import org.objectweb.asm.Type;
 
@@ -40,7 +38,6 @@ public class AccessRestrictionFactory {
     private final Map<String,AccessRestriction> instances = new HashMap<>();
     private final ClassLoader cl;
 
-    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public AccessRestrictionFactory(ClassLoader cl) {
         this.cl = cl;
     }
