@@ -1,6 +1,6 @@
 <FindBugsFilter>
     <Match>
         <!-- generated class -->
-        <Class name="org.kohsuke.accmod.impl.HelpMojo"/>
+        <Class name="org.kohsuke.access_modifier_checker.HelpMojo"/>
     </Match>
 </FindBugsFilter>
