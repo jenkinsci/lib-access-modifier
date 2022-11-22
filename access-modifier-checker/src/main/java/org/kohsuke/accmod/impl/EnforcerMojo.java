@@ -55,12 +55,9 @@ public class EnforcerMojo extends AbstractMojo {
 
     @Override
     @SuppressFBWarnings(value = {
-            "UWF_UNWRITTEN_FIELD",
             "URLCONNECTION_SSRF_FD",
-            "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD",
             "PATH_TRAVERSAL_IN",
-            "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED",
-            "NP_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"
+            "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED"
     })
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
