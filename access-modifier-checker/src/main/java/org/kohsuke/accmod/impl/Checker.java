@@ -23,7 +23,6 @@
  */
 package org.kohsuke.accmod.impl;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.maven.plugin.logging.Log;
@@ -40,20 +39,17 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import org.jvnet.hudson.annotation_indexer.Index;
 
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 
@@ -133,13 +129,7 @@ public class Checker {
      * Loads all the access restrictions defined in our dependencies.
      */
     private void loadAccessRestrictions() throws IOException {
-        for (String prefix : new String[] {"META-INF/services/annotations/", "META-INF/annotations/"}) {
-            final Enumeration<URL> res = dependencies.getResources(prefix + Restricted.class.getName());
-            while (res.hasMoreElements()) {
-                URL url = res.nextElement();
-                loadRestrictions(url.openStream(), false);
-            }
-        }
+        loadRestrictions(dependencies, false);
     }
 
     /**
@@ -148,12 +138,8 @@ public class Checker {
      * @param isInTheInspectedModule
      *      This value shows up in {@link RestrictedElement#isInTheInspectedModule()}.
      */
-    public void loadRestrictions(InputStream stream, final boolean isInTheInspectedModule) throws IOException {
-        if (stream==null)      return;
-
-        BufferedReader r = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-        String className;
-        while ((className=r.readLine())!=null) {
+    public void loadRestrictions(ClassLoader cl, final boolean isInTheInspectedModule) throws IOException {
+        for (String className : Index.listClassNames(Restricted.class, cl)) {
             InputStream is = dependencies.getResourceAsStream(className.replace('.','/') + ".class");
             if (is==null) {
                 errorListener.onWarning(null,null,"Failed to find class file for "+ className);

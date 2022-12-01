@@ -14,7 +14,6 @@ import org.kohsuke.accmod.Restricted;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -95,17 +94,11 @@ public class EnforcerMojo extends AbstractMojo {
                 }, properties != null ? properties : new Properties(), getLog());
 
             // If there is a restriction list in the inspected module itself, load it as well:
-            for (String prefix : new String[] {"META-INF/services/annotations/", "META-INF/annotations/"}) {
-                URL local = new URL(outputURL, prefix + Restricted.class.getName());
-                InputStream self = null;
-                try {
-                    self = local.openStream();
-                    getLog().debug("loaded local index " + local);
-                } catch (IOException e) {
-                    getLog().debug("could not load local index " + local, e);
-                }
-                if (self!=null)
-                    checker.loadRestrictions(self, true);
+            try {
+                checker.loadRestrictions(new URLClassLoader(new URL[] {outputURL}, ClassLoader.getSystemClassLoader().getParent()), true);
+                getLog().debug("loaded local index " + outputURL);
+            } catch (IOException e) {
+                getLog().debug("could not load local index " + outputURL, e);
             }
 
             // perform checks
