@@ -38,5 +38,6 @@ public interface RestrictedElement {
      */
     boolean isInTheInspectedModule();
 
+    @Override
     String toString();
 }

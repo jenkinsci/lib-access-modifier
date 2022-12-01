@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -53,13 +52,11 @@ public class EnforcerMojo extends AbstractMojo {
     @Parameter
     private Properties properties;
 
+    @Override
     @SuppressFBWarnings(value = {
-            "UWF_UNWRITTEN_FIELD",
             "URLCONNECTION_SSRF_FD",
-            "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD",
             "PATH_TRAVERSAL_IN",
-            "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED",
-            "NP_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"
+            "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED"
     })
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
@@ -69,16 +66,17 @@ public class EnforcerMojo extends AbstractMojo {
         try {
             File outputDir = new File(project.getBuild().getOutputDirectory());
 
-            List<URL> dependencies = new ArrayList<URL>();
-            for (Artifact a : (Collection<Artifact>)project.getArtifacts())
+            List<URL> dependencies = new ArrayList<>();
+            for (Artifact a : project.getArtifacts())
                 dependencies.add(a.getFile().toURI().toURL());
             URL outputURL = outputDir.toURI().toURL();
             dependencies.add(outputURL);
             getLog().debug("inspecting\n" + dependencies.stream().map(URL::toString).collect(Collectors.joining("\n")));
 
             final boolean[] failed = new boolean[1];
-            Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[dependencies.size()]), getClass().getClassLoader()),
+            Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[0]), getClass().getClassLoader()),
                 new ErrorListener() {
+                    @Override
                     public void onError(Throwable t, Location loc, String msg) {
                         String locMsg = loc+" "+msg;
                         if (failOnError) {
@@ -89,6 +87,7 @@ public class EnforcerMojo extends AbstractMojo {
                         failed[0] = true;
                     }
 
+                    @Override
                     public void onWarning(Throwable t, Location loc, String msg) {
                         getLog().warn(loc+" "+msg,t);
                     }

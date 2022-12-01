@@ -35,7 +35,7 @@ import java.util.Map;
  * @author Kohsuke Kawaguchi
  */
 public class AccessRestrictionFactory {
-    private final Map<String,AccessRestriction> instances = new HashMap<String, AccessRestriction>();
+    private final Map<String,AccessRestriction> instances = new HashMap<>();
     private final ClassLoader cl;
 
     public AccessRestrictionFactory(ClassLoader cl) {

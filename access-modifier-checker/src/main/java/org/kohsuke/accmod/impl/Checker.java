@@ -23,6 +23,7 @@
  */
 package org.kohsuke.accmod.impl;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.maven.plugin.logging.Log;
@@ -82,7 +83,7 @@ public class Checker {
      * <li>internal name of a type + '.' + method name + method descriptor
      * </ul>
      */
-    private final Map<String,Restrictions> restrictions = new HashMap<String,Restrictions>();
+    private final Map<String,Restrictions> restrictions = new HashMap<>();
 
     private final AccessRestrictionFactory factory;
 
@@ -186,10 +187,12 @@ public class Checker {
                     private AnnotationVisitor onAnnotationFor(final String keyName, String desc) {
                         if (RESTRICTED_DESCRIPTOR.equals(desc)) {
                             RestrictedElement target = new RestrictedElement() {
+                                @Override
                                 public boolean isInTheInspectedModule() {
                                     return isInTheInspectedModule;
                                 }
 
+                                @Override
                                 public String toString() { return keyName; }
                             };
                             return new Parser(target) {
@@ -197,11 +200,7 @@ public class Checker {
                                 public void visitEnd() {
                                     try {
                                         restrictions.put(keyName,build(factory));
-                                    } catch (ClassNotFoundException e) {
-                                        failure(e);
-                                    } catch (InstantiationException e) {
-                                        failure(e);
-                                    } catch (IllegalAccessException e) {
+                                    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                                         failure(e);
                                     }
                                 }
@@ -227,12 +226,9 @@ public class Checker {
      * Inspects a class for the restriction violations.
      */
     public void checkClass(File clazz) throws IOException {
-        FileInputStream in = new FileInputStream(clazz);
-        try {
+        try (FileInputStream in = new FileInputStream(clazz)) {
             ClassReader cr = new ClassReader(in);
             cr.accept(new RestrictedClassVisitor(), SKIP_FRAMES);
-        } finally {
-            in.close();
         }
     }
 
@@ -345,26 +341,32 @@ public class Checker {
          * Constant that represents the current location.
          */
         private final Location currentLocation = new Location() {
+            @Override
             public String getClassName() {
                 return className.replace('/','.');
             }
 
+            @Override
             public String getMethodName() {
                 return methodName;
             }
 
+            @Override
             public String getMethodDescriptor() {
                 return methodDesc;
             }
 
+            @Override
             public int getLineNumber() {
                 return line;
             }
 
+            @Override
             public String toString() {
                 return className+':'+line;
             }
 
+            @Override
             public ClassLoader getDependencyClassLoader() {
                 return dependencies;
             }
@@ -415,6 +417,7 @@ public class Checker {
             line = _line;
         }
 
+        @Override
         public void visitTypeInsn(int opcode, String type) {
             switch (opcode) {
             case Opcodes.NEW:
