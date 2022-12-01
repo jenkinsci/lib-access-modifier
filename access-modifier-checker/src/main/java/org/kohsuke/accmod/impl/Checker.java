@@ -23,7 +23,6 @@
  */
 package org.kohsuke.accmod.impl;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.maven.plugin.logging.Log;
