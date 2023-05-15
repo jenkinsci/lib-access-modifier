@@ -47,7 +47,7 @@
       <!-- annotations are not used at runtime because @Retention(value=CLASS), they are needed only to build the plugin -->
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.8.2</version>
+      <version>3.9.0</version>
       <optional>true</optional>
     </dependency>
     <dependency>
