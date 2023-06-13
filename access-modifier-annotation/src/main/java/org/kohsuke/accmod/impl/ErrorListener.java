@@ -34,9 +34,11 @@ public interface ErrorListener {
      * No-op listener.
      */
     ErrorListener NULL = new ErrorListener() {
+        @Override
         public void onError(Throwable t, Location loc, String msg) {
         }
 
+        @Override
         public void onWarning(Throwable t, Location loc, String msg) {
         }
     };

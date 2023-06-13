@@ -1,21 +1,24 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>access-modifier</artifactId>
     <groupId>org.kohsuke</groupId>
+    <artifactId>access-modifier</artifactId>
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>access-modifier-checker</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Custom Access Modifier Checker</name>
 
+  <properties>
+    <maven.version>3.8.1</maven.version>
+  </properties>
+
+  <prerequisites>
+      <maven>${maven.version}</maven>
+  </prerequisites>
+
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>access-modifier-annotation</artifactId>
@@ -27,71 +30,79 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.kohsuke.metainf-services</groupId>
-      <artifactId>metainf-services</artifactId>
-      <version>1.8</version>
-      <optional>true</optional>
+      <!-- needed when injecting the Maven Project into a plugin  -->
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>${maven.version}</version>
+      <scope>provided</scope>
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.apache.maven/maven-plugin-api -->
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
-      <version>3.6.3</version>
+      <version>${maven.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <!-- needed when injecting the Maven Project into a plugin  -->
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
-      <version>3.6.3</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
+      <!-- annotations are not used at runtime because @Retention(value=CLASS), they are needed only to build the plugin -->
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.6.0</version>
-      <optional>true</optional> <!-- annotations are not used at runtime because @Retention(value=CLASS), they are needed only to build the plugin -->
+      <version>3.9.0</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.kohsuke.metainf-services</groupId>
+      <artifactId>metainf-services</artifactId>
+      <version>1.9</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>display-info</id>
+            <configuration>
+              <rules>
+                <requireUpperBoundDeps>
+                  <excludes combine.children="append">
+                    <exclude>org.slf4j:slf4j-api</exclude>
+                  </excludes>
+                </requireUpperBoundDeps>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
   <profiles>
     <profile>
       <id>run-its</id>
       <activation>
-          <property>
-              <name>skipTests</name>
-              <value>!true</value>
-          </property>
+        <property>
+          <name>skipTests</name>
+          <value>!true</value>
+        </property>
       </activation>
       <build>
         <plugins>
           <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>mrm-maven-plugin</artifactId>
-            <version>1.2.0</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>start</goal>
-                  <goal>stop</goal>
-                </goals>
-                <configuration>
-                  <propertyName>repository.proxy.url</propertyName>
-                  <repositories>
-                    <proxyRepo />
-                  </repositories>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
             <artifactId>maven-invoker-plugin</artifactId>
-            <version>3.2.1</version>
+            <version>3.5.1</version>
             <executions>
               <execution>
                 <id>integration-test</id>
@@ -117,5 +128,4 @@
       </build>
     </profile>
   </profiles>
-
 </project>

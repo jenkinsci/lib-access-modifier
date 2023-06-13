@@ -14,13 +14,12 @@ import org.kohsuke.accmod.Restricted;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 /**
  * Enforces the {@link Restricted} access modifier annotations.
@@ -53,13 +52,11 @@ public class EnforcerMojo extends AbstractMojo {
     @Parameter
     private Properties properties;
 
+    @Override
     @SuppressFBWarnings(value = {
-            "UWF_UNWRITTEN_FIELD",
             "URLCONNECTION_SSRF_FD",
-            "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD",
             "PATH_TRAVERSAL_IN",
-            "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED",
-            "NP_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"
+            "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED"
     })
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
@@ -69,15 +66,17 @@ public class EnforcerMojo extends AbstractMojo {
         try {
             File outputDir = new File(project.getBuild().getOutputDirectory());
 
-            List<URL> dependencies = new ArrayList<URL>();
-            for (Artifact a : (Collection<Artifact>)project.getArtifacts())
+            List<URL> dependencies = new ArrayList<>();
+            for (Artifact a : project.getArtifacts())
                 dependencies.add(a.getFile().toURI().toURL());
             URL outputURL = outputDir.toURI().toURL();
             dependencies.add(outputURL);
+            getLog().debug("inspecting\n" + dependencies.stream().map(URL::toString).collect(Collectors.joining("\n")));
 
             final boolean[] failed = new boolean[1];
-            Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[dependencies.size()]), getClass().getClassLoader()),
+            Checker checker = new Checker(new URLClassLoader(dependencies.toArray(new URL[0]), getClass().getClassLoader()),
                 new ErrorListener() {
+                    @Override
                     public void onError(Throwable t, Location loc, String msg) {
                         String locMsg = loc+" "+msg;
                         if (failOnError) {
@@ -88,19 +87,18 @@ public class EnforcerMojo extends AbstractMojo {
                         failed[0] = true;
                     }
 
+                    @Override
                     public void onWarning(Throwable t, Location loc, String msg) {
                         getLog().warn(loc+" "+msg,t);
                     }
                 }, properties != null ? properties : new Properties(), getLog());
 
-            {// if there's restriction list in the inspected module itself, load it as well
-                InputStream self = null;
-                try {
-                    self = new URL(outputURL, "META-INF/annotations/" + Restricted.class.getName()).openStream();
-                } catch (IOException e) {
-                }
-                if (self!=null)
-                    checker.loadRestrictions(self, true);
+            // If there is a restriction list in the inspected module itself, load it as well:
+            try {
+                checker.loadRestrictions(new URLClassLoader(new URL[] {outputURL}, ClassLoader.getSystemClassLoader().getParent()), true);
+                getLog().debug("loaded local index " + outputURL);
+            } catch (IOException e) {
+                getLog().debug("could not load local index " + outputURL, e);
             }
 
             // perform checks

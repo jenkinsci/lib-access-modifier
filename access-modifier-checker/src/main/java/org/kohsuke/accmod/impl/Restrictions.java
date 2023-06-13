@@ -93,7 +93,7 @@ public class Restrictions extends ArrayList<AccessRestriction> {
     }
 
     abstract static class Parser extends AnnotationVisitor {
-        private List<Type> restrictions = new ArrayList<Type>();
+        private List<Type> restrictions = new ArrayList<>();
         private final RestrictedElement target;
 
         protected Parser(RestrictedElement target) {
@@ -101,21 +101,26 @@ public class Restrictions extends ArrayList<AccessRestriction> {
             this.target = target;
         }
 
+        @Override
         public void visit(String name, Object value) {
             restrictions.add((Type)value);
         }
 
+        @Override
         public void visitEnum(String name, String desc, String value) {
         }
 
+        @Override
         public AnnotationVisitor visitAnnotation(String name, String desc) {
             return this;
         }
 
+        @Override
         public AnnotationVisitor visitArray(String name) {
             return this;
         }
 
+        @Override
         public abstract void visitEnd();
 
         public Restrictions build(AccessRestrictionFactory f) throws ClassNotFoundException, InstantiationException, IllegalAccessException {

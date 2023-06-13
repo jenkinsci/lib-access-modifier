@@ -39,20 +39,17 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import org.jvnet.hudson.annotation_indexer.Index;
 
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 
@@ -85,7 +82,7 @@ public class Checker {
      * <li>internal name of a type + '.' + method name + method descriptor
      * </ul>
      */
-    private final Map<String,Restrictions> restrictions = new HashMap<String,Restrictions>();
+    private final Map<String,Restrictions> restrictions = new HashMap<>();
 
     private final AccessRestrictionFactory factory;
 
@@ -132,26 +129,17 @@ public class Checker {
      * Loads all the access restrictions defined in our dependencies.
      */
     private void loadAccessRestrictions() throws IOException {
-        final Enumeration<URL> res = dependencies.getResources("META-INF/annotations/"+Restricted.class.getName());
-        while (res.hasMoreElements()) {
-            URL url = res.nextElement();
-            loadRestrictions(url.openStream(),false);
-        }
+        loadRestrictions(dependencies, false);
     }
 
     /**
-     * Loads an additional restriction from the specified "META-INF/annotations/org.kohsuke.accmod.Restricted" file.
+     * Loads an additional restriction from the specified "META-INF/services/annotations/org.kohsuke.accmod.Restricted" file.
      *
      * @param isInTheInspectedModule
      *      This value shows up in {@link RestrictedElement#isInTheInspectedModule()}.
-     * @param stream
      */
-    public void loadRestrictions(InputStream stream, final boolean isInTheInspectedModule) throws IOException {
-        if (stream==null)      return;
-
-        BufferedReader r = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-        String className;
-        while ((className=r.readLine())!=null) {
+    public void loadRestrictions(ClassLoader cl, final boolean isInTheInspectedModule) throws IOException {
+        for (String className : Index.listClassNames(Restricted.class, cl)) {
             InputStream is = dependencies.getResourceAsStream(className.replace('.','/') + ".class");
             if (is==null) {
                 errorListener.onWarning(null,null,"Failed to find class file for "+ className);
@@ -198,10 +186,12 @@ public class Checker {
                     private AnnotationVisitor onAnnotationFor(final String keyName, String desc) {
                         if (RESTRICTED_DESCRIPTOR.equals(desc)) {
                             RestrictedElement target = new RestrictedElement() {
+                                @Override
                                 public boolean isInTheInspectedModule() {
                                     return isInTheInspectedModule;
                                 }
 
+                                @Override
                                 public String toString() { return keyName; }
                             };
                             return new Parser(target) {
@@ -209,11 +199,7 @@ public class Checker {
                                 public void visitEnd() {
                                     try {
                                         restrictions.put(keyName,build(factory));
-                                    } catch (ClassNotFoundException e) {
-                                        failure(e);
-                                    } catch (InstantiationException e) {
-                                        failure(e);
-                                    } catch (IllegalAccessException e) {
+                                    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                                         failure(e);
                                     }
                                 }
@@ -239,12 +225,9 @@ public class Checker {
      * Inspects a class for the restriction violations.
      */
     public void checkClass(File clazz) throws IOException {
-        FileInputStream in = new FileInputStream(clazz);
-        try {
+        try (FileInputStream in = new FileInputStream(clazz)) {
             ClassReader cr = new ClassReader(in);
             cr.accept(new RestrictedClassVisitor(), SKIP_FRAMES);
-        } finally {
-            in.close();
         }
     }
 
@@ -357,26 +340,32 @@ public class Checker {
          * Constant that represents the current location.
          */
         private final Location currentLocation = new Location() {
+            @Override
             public String getClassName() {
                 return className.replace('/','.');
             }
 
+            @Override
             public String getMethodName() {
                 return methodName;
             }
 
+            @Override
             public String getMethodDescriptor() {
                 return methodDesc;
             }
 
+            @Override
             public int getLineNumber() {
                 return line;
             }
 
+            @Override
             public String toString() {
                 return className+':'+line;
             }
 
+            @Override
             public ClassLoader getDependencyClassLoader() {
                 return dependencies;
             }
@@ -427,6 +416,7 @@ public class Checker {
             line = _line;
         }
 
+        @Override
         public void visitTypeInsn(int opcode, String type) {
             switch (opcode) {
             case Opcodes.NEW:
