@@ -9,6 +9,9 @@ updates:
     ignore:
       # maven core artifacts are provided by the running maven, do not update to prevent consuming something unavailable
       - dependency-name: "org.apache.maven:*"
+      # https://lists.apache.org/thread/ltd1g1dbv0lqqdw5q941gmrkfyn6m87m
+      - dependency-name: "org.codehaus.plexus:plexus-utils"
+        versions: [">=4.0.0"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
