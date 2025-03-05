@@ -53,11 +53,7 @@ public class EnforcerMojo extends AbstractMojo {
     private Properties properties;
 
     @Override
-    @SuppressFBWarnings(value = {
-            "URLCONNECTION_SSRF_FD",
-            "PATH_TRAVERSAL_IN",
-            "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED"
-    })
+    @SuppressFBWarnings(value = "PATH_TRAVERSAL_IN", justification = "User-provided value for running the program")
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
             getLog().info("Skipping access modifier checks");
