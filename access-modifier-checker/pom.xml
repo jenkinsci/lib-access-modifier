@@ -12,7 +12,7 @@
 
   <properties>
     <maven.version>3.9.6</maven.version>
-    <maven-plugin-tools.version>3.15.1</maven-plugin-tools.version>
+    <maven-plugin-tools.version>3.15.2</maven-plugin-tools.version>
   </properties>
 
   <prerequisites>
